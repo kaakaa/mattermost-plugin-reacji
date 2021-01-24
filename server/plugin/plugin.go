@@ -22,7 +22,7 @@ const (
 type Plugin struct {
 	plugin.MattermostPlugin
 	botUserID  string
-	reacjiList *reacji.ReacjiList
+	reacjiList *reacji.List
 	Store      *store.Store
 
 	// configurationLock synchronizes access to the configuration.
@@ -41,6 +41,10 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 
 func (p *Plugin) OnActivate() error {
 	p.API.LogDebug("Activate plugin")
+
+	if p.ServerConfig.ServiceSettings.SiteURL == nil {
+		return errors.New("siuteURL is not set. Please set a siteURL and restart the plugin")
+	}
 
 	bot := &model.Bot{
 		Username:    botUserName,
@@ -63,11 +67,10 @@ func (p *Plugin) OnActivate() error {
 	p.reacjiList = reacjiList
 	p.API.LogDebug("store is initialized", "registered", fmt.Sprintf("%v", p.reacjiList.Reacjis))
 
-	if p.ServerConfig.ServiceSettings.SiteURL == nil {
-		return errors.New("siuteURL is not set. Please set a siteURL and restart the plugin")
+	if err := p.registerCommand(); err != nil {
+		return err
 	}
-
-	p.registerCommand()
+	p.configuration = p.getConfiguration()
 	p.API.LogDebug("slash command is initialized")
 	return nil
 }
@@ -79,11 +82,11 @@ func (p *Plugin) OnDeactivate() error {
 	return nil
 }
 
-func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, userId string) {
+func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, userID string) {
 	for _, reacji := range reacjis {
-		fromChannel, appErr := p.API.GetChannel(reacji.FromChannelId)
+		fromChannel, appErr := p.API.GetChannel(reacji.FromChannelID)
 		if appErr != nil {
-			p.API.LogWarn("failed to get channel", "channel_id", reacji.FromChannelId, "error", appErr.Error())
+			p.API.LogWarn("failed to get channel", "channel_id", reacji.FromChannelID, "error", appErr.Error())
 			continue
 		}
 		team, appErr := p.API.GetTeam(fromChannel.TeamId)
@@ -92,11 +95,11 @@ func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, userId st
 			continue
 		}
 
-		p.API.LogDebug("share post", "channel_id", reacji.ToChannelId, "post_id", post.Id, "user_id", p.botUserID)
+		p.API.LogDebug("share post", "channel_id", reacji.ToChannelID, "post_id", post.Id, "user_id", p.botUserID)
 		newPost := &model.Post{
 			Type:      model.POST_DEFAULT,
 			UserId:    p.botUserID,
-			ChannelId: reacji.ToChannelId,
+			ChannelId: reacji.ToChannelID,
 			Message:   fmt.Sprintf("> Shared from ~%s. ([original post](%s))", fromChannel.Name, p.makePostLink(team.Name, post.Id)),
 		}
 		if _, appErr := p.API.CreatePost(newPost); appErr != nil {
@@ -109,20 +112,20 @@ func (p *Plugin) makePostLink(teamName, postID string) string {
 	return fmt.Sprintf("%s/%s/pl/%s", *p.ServerConfig.ServiceSettings.SiteURL, teamName, postID)
 }
 
-func (p *Plugin) ConvertUserIDToDisplayName(userId string) (string, *model.AppError) {
-	user, appErr := p.API.GetUser(userId)
+func (p *Plugin) ConvertUserIDToDisplayName(userID string) (string, *model.AppError) {
+	user, appErr := p.API.GetUser(userID)
 	if appErr != nil {
 		return "", appErr
 	}
 	return "@" + user.GetDisplayName(model.SHOW_USERNAME), nil
 }
 
-func (p *Plugin) HasAdminPermission(reacji *reacji.Reacji, issuerId string) (bool, *model.AppError) {
-	if reacji != nil && issuerId == reacji.Creator {
+func (p *Plugin) HasAdminPermission(reacji *reacji.Reacji, issuerID string) (bool, *model.AppError) {
+	if reacji != nil && issuerID == reacji.Creator {
 		return true, nil
 	}
 
-	user, appErr := p.API.GetUser(issuerId)
+	user, appErr := p.API.GetUser(issuerID)
 	if appErr != nil {
 		return false, appErr
 	}
@@ -132,14 +135,14 @@ func (p *Plugin) HasAdminPermission(reacji *reacji.Reacji, issuerId string) (boo
 	return false, nil
 }
 
-func (p *Plugin) HasPermissionToPrivateChannel(from, to *model.Channel, issuerId string) bool {
+func (p *Plugin) HasPermissionToPrivateChannel(from, to *model.Channel, issuerID string) bool {
 	if from.Type != model.CHANNEL_OPEN {
-		if !p.API.HasPermissionToChannel(issuerId, from.Id, model.PERMISSION_READ_CHANNEL) {
+		if !p.API.HasPermissionToChannel(issuerID, from.Id, model.PERMISSION_READ_CHANNEL) {
 			return false
 		}
 	}
 	if to.Type != model.CHANNEL_OPEN {
-		if !p.API.HasPermissionToChannel(issuerId, to.Id, model.PERMISSION_READ_CHANNEL) {
+		if !p.API.HasPermissionToChannel(issuerID, to.Id, model.PERMISSION_READ_CHANNEL) {
 			return false
 		}
 	}

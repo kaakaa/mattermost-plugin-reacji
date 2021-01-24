@@ -13,19 +13,19 @@ import (
 
 // ReactionHasBeenAdded shares a post if registered reaction is attached to a post
 func (p *Plugin) ReactionHasBeenAdded(c *plugin.Context, reaction *model.Reaction) {
-	postId := reaction.PostId
+	postID := reaction.PostId
 	emojiName := reaction.EmojiName
 
-	post, appErr := p.API.GetPost(postId)
+	post, appErr := p.API.GetPost(postID)
 	if appErr != nil {
-		p.API.LogWarn("failed to get post", "post_id", postId)
+		p.API.LogWarn("failed to get post", "post_id", postID)
 		return
 	}
-	channelId := post.ChannelId
+	channelID := post.ChannelId
 
 	var reacjis []*reacji.Reacji
 	for _, reacji := range p.reacjiList.Reacjis {
-		if reacji.FromChannelId == channelId {
+		if reacji.FromChannelID == channelID {
 			if reacji.EmojiName == emojiName {
 				reacjis = append(reacjis, reacji)
 			}

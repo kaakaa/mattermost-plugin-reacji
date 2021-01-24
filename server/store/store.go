@@ -8,7 +8,7 @@ import (
 	"github.com/mattermost/mattermost-server/v5/plugin"
 )
 
-const keyReacjiList = "reacjis_list"
+const keyList = "reacjis_list"
 
 type Store struct {
 	api         plugin.API
@@ -26,34 +26,34 @@ type ReacjiStore struct {
 	api plugin.API
 }
 
-func (s *ReacjiStore) Get() (*reacji.ReacjiList, error) {
-	b, err := s.api.KVGet(keyReacjiList)
+func (s *ReacjiStore) Get() (*reacji.List, error) {
+	b, err := s.api.KVGet(keyList)
 	if err != nil {
 		return nil, err
 	}
 	// b is nil for non-existent
 	if b == nil {
-		init := &reacji.ReacjiList{}
-		appErr := s.api.KVSet(keyReacjiList, init.EncodeToByte())
+		init := &reacji.List{}
+		appErr := s.api.KVSet(keyList, init.EncodeToByte())
 		if appErr != nil {
 			return nil, errors.New("failed to set up kvstore")
 		}
 		return init, nil
 	}
 
-	list := reacji.DecodeReacjiListFromByte(b)
+	list := reacji.DecodeListFromByte(b)
 	if list == nil {
 		return nil, errors.New("failed to decode ReacjisList")
 	}
 	return list, nil
 }
 
-func (s *ReacjiStore) Update(prev, new *reacji.ReacjiList) error {
+func (s *ReacjiStore) Update(prev, new *reacji.List) error {
 	opt := model.PluginKVSetOptions{
 		Atomic:   true,
 		OldValue: prev.EncodeToByte(),
 	}
-	ok, err := s.api.KVSetWithOptions(keyReacjiList, new.EncodeToByte(), opt)
+	ok, err := s.api.KVSetWithOptions(keyList, new.EncodeToByte(), opt)
 	if err != nil {
 		return err
 	}
@@ -63,8 +63,8 @@ func (s *ReacjiStore) Update(prev, new *reacji.ReacjiList) error {
 	return nil
 }
 
-func (s *ReacjiStore) ForceUpdate(new *reacji.ReacjiList) error {
-	appErr := s.api.KVSet(keyReacjiList, new.EncodeToByte())
+func (s *ReacjiStore) ForceUpdate(new *reacji.List) error {
+	appErr := s.api.KVSet(keyList, new.EncodeToByte())
 	if appErr != nil {
 		return errors.New(appErr.Error())
 	}

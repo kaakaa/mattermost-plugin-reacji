@@ -11,9 +11,8 @@ import (
 	"github.com/mattermost/mattermost-server/v5/plugin"
 )
 
-func (p *Plugin) registerCommand() {
-	// TODO: AutocompleteData https://pkg.go.dev/github.com/mattermost/mattermost-server/v5/model#AutocompleteData
-	p.API.RegisterCommand(&model.Command{
+func (p *Plugin) registerCommand() error {
+	return p.API.RegisterCommand(&model.Command{
 		Trigger:          "reacji",
 		DisplayName:      "Reacji Channeler",
 		Description:      "Move post to other channel by attaching reactions",
@@ -25,8 +24,8 @@ func (p *Plugin) registerCommand() {
 }
 
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
-	userId := args.UserId
-	fromChannelId := args.ChannelId
+	userID := args.UserId
+	FromChannelID := args.ChannelId
 	cmdElements := strings.Split(args.Command, " ")
 
 	if len(cmdElements) == 1 || cmdElements[0] != "/"+CommandNameReacji {
@@ -47,7 +46,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		if len(emojiNames) == 0 || len(toChannelIds) == 0 {
 			return &model.CommandResponse{Text: "Must specify at least one emoji and at least one channel"}, nil
 		}
-		if err := p.storeReacjis(userId, args.TeamId, fromChannelId, emojiNames, toChannelIds); err != nil {
+		if err := p.storeReacjis(userID, args.TeamId, FromChannelID, emojiNames, toChannelIds); err != nil {
 			return &model.CommandResponse{
 				Text: fmt.Sprintf("failed to store reacjis. error=%s", err.Error()),
 			}, nil
@@ -57,17 +56,17 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		if len(cmdElements) == 2 {
 			return &model.CommandResponse{Text: "No delete key"}, nil
 		}
-		return p.remove(userId, cmdElements[2:])
+		return p.remove(userID, cmdElements[2:])
 	case "remove-all":
 		if len(cmdElements) == 3 && cmdElements[2] == "--force" {
-			return p.forceRemoveAll(userId)
+			return p.forceRemoveAll(userID)
 		}
-		return p.removeAll(userId)
+		return p.removeAll(userID)
 	case "list":
 		if len(cmdElements) == 3 && cmdElements[2] == "--all" {
-			return p.listAll(userId)
+			return p.listAll(userID)
 		}
-		return p.list(userId, fromChannelId)
+		return p.list(userID, FromChannelID)
 	case "help":
 		return p.help()
 	default:
@@ -77,10 +76,10 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 func (p *Plugin) findEmojis(args []string) []string {
 	var ret []string
+	re := regexp.MustCompile(`^:[^:]+:$`)
 	for _, e := range args {
 		text := strings.TrimSpace(e)
-		matched, err := regexp.MatchString(`^:[^:]+:$`, text)
-		if matched && err == nil {
+		if re.MatchString(text) {
 			emojiName := strings.Trim(text, ":")
 			if p.isAvailableEmoji(emojiName) {
 				ret = append(ret, emojiName)
@@ -100,18 +99,18 @@ func (p *Plugin) isAvailableEmoji(name string) bool {
 	return appErr == nil
 }
 
-func (p *Plugin) storeReacjis(userId, teamId, fromChannelId string, emojiNames, toChannelIds []string) error {
+func (p *Plugin) storeReacjis(userID, teamID, fromChannelID string, emojiNames, toChannelIds []string) error {
 	new := p.reacjiList.Clone()
 	count := 0
 	for _, emoji := range emojiNames {
 		for _, to := range toChannelIds {
-			if !exists(p.reacjiList, emoji, teamId, to) {
+			if !exists(p.reacjiList, emoji, teamID, to) {
 				new.Reacjis = append(new.Reacjis, &reacji.Reacji{
 					DeleteKey:     model.NewId(),
-					Creator:       userId,
-					TeamId:        teamId,
-					FromChannelId: fromChannelId,
-					ToChannelId:   to,
+					Creator:       userID,
+					TeamID:        teamID,
+					FromChannelID: fromChannelID,
+					ToChannelID:   to,
 					EmojiName:     emoji,
 				})
 				count++
@@ -129,21 +128,21 @@ func (p *Plugin) storeReacjis(userId, teamId, fromChannelId string, emojiNames, 
 	return nil
 }
 
-func exists(list *reacji.ReacjiList, emoji, teamId, to string) bool {
+func exists(list *reacji.List, emoji, teamID, to string) bool {
 	for _, reacji := range list.Reacjis {
-		if reacji.EmojiName == emoji && reacji.TeamId == teamId && reacji.ToChannelId == to {
+		if reacji.EmojiName == emoji && reacji.TeamID == teamID && reacji.ToChannelID == to {
 			return true
 		}
 	}
 	return false
 }
 
-func (p *Plugin) remove(userId string, keys []string) (*model.CommandResponse, *model.AppError) {
-	new := &reacji.ReacjiList{}
+func (p *Plugin) remove(userID string, keys []string) (*model.CommandResponse, *model.AppError) {
+	new := &reacji.List{}
 	var failed []*reacji.Reacji
 	for _, r := range p.reacjiList.Reacjis {
 		if include(keys, r.DeleteKey) {
-			if b, _ := p.HasAdminPermission(r, userId); b {
+			if b, _ := p.HasAdminPermission(r, userID); b {
 				continue
 			} else {
 				failed = append(failed, r)
@@ -159,13 +158,13 @@ func (p *Plugin) remove(userId string, keys []string) (*model.CommandResponse, *
 	p.reacjiList = new
 	if len(failed) == 0 {
 		return &model.CommandResponse{Text: "Reacjis are removed"}, nil
-	} else {
-		var emojis []string
-		for _, f := range failed {
-			emojis = append(emojis, f.DeleteKey)
-		}
-		return &model.CommandResponse{Text: fmt.Sprintf("Complete to remove reacjis. However, at least one reacjis encountered error: [%s]\nReacji can be removed by creator or SystemAdministrator.", strings.Join(emojis, ", "))}, nil
 	}
+
+	var emojis []string
+	for _, f := range failed {
+		emojis = append(emojis, f.DeleteKey)
+	}
+	return &model.CommandResponse{Text: fmt.Sprintf("Complete to remove reacjis. However, at least one reacjis encountered error: [%s]\nReacji can be removed by creator or SystemAdministrator.", strings.Join(emojis, ", "))}, nil
 }
 
 func include(list []string, key string) bool {
@@ -177,9 +176,9 @@ func include(list []string, key string) bool {
 	return false
 }
 
-func (p *Plugin) removeAll(userId string) (*model.CommandResponse, *model.AppError) {
+func (p *Plugin) removeAll(userID string) (*model.CommandResponse, *model.AppError) {
 	// TODO: confirm button
-	if b, appErr := p.HasAdminPermission(nil, userId); !b {
+	if b, appErr := p.HasAdminPermission(nil, userID); !b {
 		appendix := ""
 		if appErr != nil {
 			appendix = fmt.Sprintf("(%s)", appErr.Error())
@@ -188,7 +187,7 @@ func (p *Plugin) removeAll(userId string) (*model.CommandResponse, *model.AppErr
 			Text: "Failed to remove emojis due to invalid permission " + appendix,
 		}, nil
 	}
-	new := &reacji.ReacjiList{}
+	new := &reacji.List{}
 	if err := p.Store.ReacjiStore.Update(p.reacjiList, new); err != nil {
 		return &model.CommandResponse{
 			Text: err.Error(),
@@ -199,9 +198,9 @@ func (p *Plugin) removeAll(userId string) (*model.CommandResponse, *model.AppErr
 		Text: "All reacjis are removed.",
 	}, nil
 }
-func (p *Plugin) forceRemoveAll(userId string) (*model.CommandResponse, *model.AppError) {
+func (p *Plugin) forceRemoveAll(userID string) (*model.CommandResponse, *model.AppError) {
 	// TODO: confirm button
-	if b, appErr := p.HasAdminPermission(nil, userId); !b {
+	if b, appErr := p.HasAdminPermission(nil, userID); !b {
 		appendix := ""
 		if appErr != nil {
 			appendix = fmt.Sprintf("(%s)", appErr.Error())
@@ -211,7 +210,7 @@ func (p *Plugin) forceRemoveAll(userId string) (*model.CommandResponse, *model.A
 		}, nil
 	}
 
-	new := &reacji.ReacjiList{}
+	new := &reacji.List{}
 	if err := p.Store.ReacjiStore.ForceUpdate(new); err != nil {
 		return &model.CommandResponse{
 			Text: err.Error(),
@@ -223,43 +222,43 @@ func (p *Plugin) forceRemoveAll(userId string) (*model.CommandResponse, *model.A
 	}, nil
 }
 
-func (p *Plugin) listAll(userId string) (*model.CommandResponse, *model.AppError) {
+func (p *Plugin) listAll(userID string) (*model.CommandResponse, *model.AppError) {
 	table := []string{"| EmojiName | Team | from | to | Creator | DeleteKey | "}
 	table = append(table, "|:-----:|:-----|:-----|:---|:--------|:----------|")
 	channelCaches := map[string]*model.Channel{}
 	for _, r := range p.reacjiList.Reacjis {
-		from := fmt.Sprintf("Notfound(ID: %s)", r.FromChannelId)
-		if ch, ok := channelCaches[r.FromChannelId]; ok {
+		from := fmt.Sprintf("Notfound(ID: %s)", r.FromChannelID)
+		if ch, ok := channelCaches[r.FromChannelID]; ok {
 			from = fmt.Sprintf("~%s", ch.Name)
 		} else {
-			fromChannel, appErr := p.API.GetChannel(r.FromChannelId)
+			fromChannel, appErr := p.API.GetChannel(r.FromChannelID)
 			if appErr == nil {
 				from = fmt.Sprintf("~%s", fromChannel.Name)
-				channelCaches[r.FromChannelId] = fromChannel
+				channelCaches[r.FromChannelID] = fromChannel
 			}
 		}
 
-		to := fmt.Sprintf("Notfound(ID: %s)", r.ToChannelId)
-		if ch, ok := channelCaches[r.ToChannelId]; ok {
+		to := fmt.Sprintf("Notfound(ID: %s)", r.ToChannelID)
+		if ch, ok := channelCaches[r.ToChannelID]; ok {
 			to = fmt.Sprintf("~%s", ch.Name)
 		} else {
-			toChannel, appErr := p.API.GetChannel(r.ToChannelId)
+			toChannel, appErr := p.API.GetChannel(r.ToChannelID)
 			if appErr == nil {
 				to = fmt.Sprintf("~%s", toChannel.Name)
-				channelCaches[r.ToChannelId] = toChannel
+				channelCaches[r.ToChannelID] = toChannel
 			}
 		}
 
-		if !p.HasPermissionToPrivateChannel(channelCaches[r.FromChannelId], channelCaches[r.ToChannelId], userId) {
+		if !p.HasPermissionToPrivateChannel(channelCaches[r.FromChannelID], channelCaches[r.ToChannelID], userID) {
 			continue
 		}
 
 		teamName := "Unknown"
-		team, appErr := p.API.GetTeam(r.TeamId)
+		team, appErr := p.API.GetTeam(r.TeamID)
 		if appErr == nil {
 			teamName = team.Name
 		} else {
-			p.API.LogWarn("failed to get team", "team_id", r.TeamId)
+			p.API.LogWarn("failed to get team", "team_id", r.TeamID)
 		}
 
 		creator, appErr := p.ConvertUserIDToDisplayName(r.Creator)
@@ -277,48 +276,48 @@ func (p *Plugin) listAll(userId string) (*model.CommandResponse, *model.AppError
 	}, nil
 }
 
-func (p *Plugin) list(userId, channelId string) (*model.CommandResponse, *model.AppError) {
+func (p *Plugin) list(userID, channelID string) (*model.CommandResponse, *model.AppError) {
 	table := []string{"| EmojiName | team | from | to | Creator | DeleteKey | "}
 	table = append(table, "|:-----:|:-----|:-----|:---|:--------|:----------|")
 
 	channelCaches := map[string]*model.Channel{}
 
-	fromChannel, appErr := p.API.GetChannel(channelId)
+	fromChannel, appErr := p.API.GetChannel(channelID)
 	if appErr != nil {
 		return &model.CommandResponse{
-			Text: fmt.Sprintf("Failed to get channel by ID: %s", channelId),
+			Text: fmt.Sprintf("Failed to get channel by ID: %s", channelID),
 		}, nil
 	}
-	channelCaches[channelId] = fromChannel
+	channelCaches[channelID] = fromChannel
 	from := fmt.Sprintf("~%s", fromChannel.Name)
 
 	for _, r := range p.reacjiList.Reacjis {
 		// Skip if reacji from channel is differ from channel where command is executed
-		if r.FromChannelId != channelId {
+		if r.FromChannelID != channelID {
 			continue
 		}
 
-		to := fmt.Sprintf("Notfound(ID: %s)", r.ToChannelId)
-		if ch, ok := channelCaches[r.ToChannelId]; ok {
+		to := fmt.Sprintf("Notfound(ID: %s)", r.ToChannelID)
+		if ch, ok := channelCaches[r.ToChannelID]; ok {
 			to = fmt.Sprintf("~%s", ch.Name)
 		} else {
-			toChannel, appErr := p.API.GetChannel(r.ToChannelId)
+			toChannel, appErr := p.API.GetChannel(r.ToChannelID)
 			if appErr == nil {
 				to = fmt.Sprintf("~%s", toChannel.Name)
-				channelCaches[r.ToChannelId] = toChannel
+				channelCaches[r.ToChannelID] = toChannel
 			}
 		}
 
-		if !p.HasPermissionToPrivateChannel(channelCaches[r.FromChannelId], channelCaches[r.ToChannelId], userId) {
+		if !p.HasPermissionToPrivateChannel(channelCaches[r.FromChannelID], channelCaches[r.ToChannelID], userID) {
 			continue
 		}
 
 		teamName := "Unknown"
-		team, appErr := p.API.GetTeam(r.TeamId)
+		team, appErr := p.API.GetTeam(r.TeamID)
 		if appErr == nil {
 			teamName = team.Name
 		} else {
-			p.API.LogWarn("failed to get team", "team_id", r.TeamId)
+			p.API.LogWarn("failed to get team", "team_id", r.TeamID)
 		}
 
 		creator, appErr := p.ConvertUserIDToDisplayName(r.Creator)
