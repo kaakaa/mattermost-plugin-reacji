@@ -223,7 +223,11 @@ func (p *Plugin) forceRemoveAll(userID string) (*model.CommandResponse, *model.A
 }
 
 func (p *Plugin) listAll(userID string) (*model.CommandResponse, *model.AppError) {
-	table := []string{"| EmojiName | Team | from | to | Creator | DeleteKey | "}
+	table := []string{
+		"### All reacjis",
+		"",
+		"| Emoji | Team | From | To | Creator | DeleteKey | ",
+	}
 	table = append(table, "|:-----:|:-----|:-----|:---|:--------|:----------|")
 	channelCaches := map[string]*model.Channel{}
 	for _, r := range p.reacjiList.Reacjis {
@@ -277,7 +281,11 @@ func (p *Plugin) listAll(userID string) (*model.CommandResponse, *model.AppError
 }
 
 func (p *Plugin) list(userID, channelID string) (*model.CommandResponse, *model.AppError) {
-	table := []string{"| EmojiName | team | from | to | Creator | DeleteKey | "}
+	table := []string{
+		"### Reacjis in this channel",
+		"",
+		"| Emoji | Team | From | To | Creator | DeleteKey | ",
+	}
 	table = append(table, "|:-----:|:-----|:-----|:---|:--------|:----------|")
 
 	channelCaches := map[string]*model.Channel{}
