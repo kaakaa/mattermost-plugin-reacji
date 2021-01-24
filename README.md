@@ -1,3 +1,5 @@
+[![kaakaa](https://circleci.com/gh/kaakaa/mattermost-plugin-reacji.svg?style=svg)](https://circleci.com/gh/kaakaa/mattermost-plugin-reacji)
+
 # Mattermost Plugin Reacji
 
 Mattermost Reacji plugin inspired by [Slack's Reacji Channeler](https://reacji-channeler.builtbyslack.com/)
