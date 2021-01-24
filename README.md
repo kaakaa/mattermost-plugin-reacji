@@ -30,3 +30,7 @@ Download plugin from [Releases](https://github.com/kaakaa/mattermost-plugin-reac
 ## Notes
 
 -   Couldn't set private channel and DM/GM channel as `to` channel
+
+## Licence
+
+See [LICENSE](./LICENSE)
