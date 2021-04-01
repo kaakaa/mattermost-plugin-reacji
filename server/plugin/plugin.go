@@ -8,6 +8,7 @@ import (
 
 	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
+	"github.com/kaakaa/mattermost-plugin-reacji/server/store/kvstore"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/plugin"
 )
@@ -23,7 +24,7 @@ type Plugin struct {
 	plugin.MattermostPlugin
 	botUserID  string
 	reacjiList *reacji.List
-	Store      *store.Store
+	Store      store.Store
 
 	// configurationLock synchronizes access to the configuration.
 	configurationLock sync.RWMutex
@@ -59,8 +60,8 @@ func (p *Plugin) OnActivate() error {
 	}
 	p.botUserID = botUserID
 
-	p.Store = store.NewStore(p.API)
-	reacjiList, err := p.Store.ReacjiStore.Get()
+	p.Store = kvstore.NewStore(p.API)
+	reacjiList, err := p.Store.Reacji().Get()
 	if err != nil {
 		return err
 	}

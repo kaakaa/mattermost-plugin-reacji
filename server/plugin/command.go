@@ -120,7 +120,7 @@ func (p *Plugin) storeReacjis(userID, teamID, fromChannelID string, emojiNames, 
 	if count == 0 {
 		return errors.New("reacji is already registered")
 	}
-	if err := p.Store.ReacjiStore.Update(p.reacjiList, new); err != nil {
+	if err := p.Store.Reacji().Update(p.reacjiList, new); err != nil {
 		return err
 	}
 	p.reacjiList = new
@@ -152,7 +152,7 @@ func (p *Plugin) remove(userID string, keys []string) (*model.CommandResponse, *
 			new.Reacjis = append(new.Reacjis, r)
 		}
 	}
-	if err := p.Store.ReacjiStore.Update(p.reacjiList, new); err != nil {
+	if err := p.Store.Reacji().Update(p.reacjiList, new); err != nil {
 		return &model.CommandResponse{Text: "failed to remove reacjis"}, nil
 	}
 	p.reacjiList = new
@@ -188,7 +188,7 @@ func (p *Plugin) removeAll(userID string) (*model.CommandResponse, *model.AppErr
 		}, nil
 	}
 	new := &reacji.List{}
-	if err := p.Store.ReacjiStore.Update(p.reacjiList, new); err != nil {
+	if err := p.Store.Reacji().Update(p.reacjiList, new); err != nil {
 		return &model.CommandResponse{
 			Text: err.Error(),
 		}, nil
@@ -211,7 +211,7 @@ func (p *Plugin) forceRemoveAll(userID string) (*model.CommandResponse, *model.A
 	}
 
 	new := &reacji.List{}
-	if err := p.Store.ReacjiStore.ForceUpdate(new); err != nil {
+	if err := p.Store.Reacji().ForceUpdate(new); err != nil {
 		return &model.CommandResponse{
 			Text: err.Error(),
 		}, nil
