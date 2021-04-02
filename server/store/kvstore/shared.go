@@ -12,10 +12,11 @@ import (
 	"github.com/mattermost/mattermost-server/v5/plugin"
 )
 
-const SharedKeyHeader = "shared"
+const SharedKeyHeader = "shared-"
 
 type SharedStore struct {
-	api plugin.API
+	api     plugin.API
+	helpers plugin.Helpers
 }
 
 func (s *SharedStore) Get(postID, toChannelID, deleteKey string) (*reacji.SharedPost, error) {
@@ -50,9 +51,26 @@ func (s *SharedStore) Set(new *reacji.SharedPost, days int) error {
 	return nil
 }
 
+func (s *SharedStore) DeleteAll() (int, error) {
+	kvListOption := plugin.WithPrefix(SharedKeyHeader)
+	keys, err := s.helpers.KVListWithOptions(kvListOption)
+	if err != nil {
+		return -1, err
+	}
+	var count int
+	for _, k := range keys {
+		if err := s.api.KVDelete(k); err != nil {
+			return -1, err
+		}
+		count++
+	}
+	return count, nil
+}
+
 func genKey(postID, toChannelID, deleteKey string) string {
 	h := md5.New()
 	defer h.Reset()
-	h.Write([]byte(fmt.Sprintf("%s-%s-%s-%s", SharedKeyHeader, postID, toChannelID, deleteKey)))
-	return hex.EncodeToString(h.Sum(nil))
+	h.Write([]byte(fmt.Sprintf("%s-%s-%s", postID, toChannelID, deleteKey)))
+	v := hex.EncodeToString(h.Sum(nil))
+	return fmt.Sprintf("%s%s", SharedKeyHeader, v)
 }

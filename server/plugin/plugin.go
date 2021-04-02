@@ -60,7 +60,7 @@ func (p *Plugin) OnActivate() error {
 	}
 	p.botUserID = botUserID
 
-	p.Store = kvstore.NewStore(p.API)
+	p.Store = kvstore.NewStore(p.API, p.Helpers)
 	reacjiList, err := p.Store.Reacji().Get()
 	if err != nil {
 		return err

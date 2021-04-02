@@ -16,4 +16,5 @@ type ReacjiStore interface {
 type SharedStore interface {
 	Get(postID, toChannelID, deleteKey string) (*reacji.SharedPost, error)
 	Set(new *reacji.SharedPost, days int) error
+	DeleteAll() (int, error)
 }

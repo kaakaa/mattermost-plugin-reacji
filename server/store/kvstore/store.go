@@ -11,11 +11,11 @@ type Store struct {
 	SharedStore SharedStore
 }
 
-func NewStore(api plugin.API) store.Store {
+func NewStore(api plugin.API, helpers plugin.Helpers) store.Store {
 	return &Store{
 		api:         api,
 		ReacjiStore: ReacjiStore{api: api},
-		SharedStore: SharedStore{api: api},
+		SharedStore: SharedStore{api: api, helpers: helpers},
 	}
 }
 
