@@ -28,7 +28,24 @@ const manifestStr = `
   "settings_schema": {
     "header": "",
     "footer": "",
-    "settings": []
+    "settings": [
+      {
+        "key": "AllowDuplicatedSharing",
+        "display_name": "allowDuplicatedSharing",
+        "type": "bool",
+        "help_text": "",
+        "placeholder": "",
+        "default": false
+      },
+      {
+        "key": "DaysToKeepSharedRecord",
+        "display_name": "daysToKeepSharedRecord",
+        "type": "number",
+        "help_text": "",
+        "placeholder": "",
+        "default": 30
+      }
+    ]
   }
 }
 `
