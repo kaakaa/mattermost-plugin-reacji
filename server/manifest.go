@@ -30,8 +30,8 @@ const manifestStr = `
     "footer": "",
     "settings": [
       {
-        "key": "AllowDuplicatedSharing",
-        "display_name": "allowDuplicatedSharing",
+        "key": "AllowDuplicateSharing",
+        "display_name": "Allow duplicate sharing",
         "type": "bool",
         "help_text": "",
         "placeholder": "",
@@ -39,7 +39,7 @@ const manifestStr = `
       },
       {
         "key": "DaysToKeepSharedRecord",
-        "display_name": "daysToKeepSharedRecord",
+        "display_name": "Days to keep shared record",
         "type": "number",
         "help_text": "",
         "placeholder": "",

@@ -91,7 +91,7 @@ func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, userID st
 			continue
 		}
 
-		if shared != nil && !p.getConfiguration().AllowDuplicatedSharing {
+		if shared != nil && !p.getConfiguration().AllowDuplicateSharing {
 			// Skip sharing because this post have already been shared
 			p.API.LogDebug("this reacji has already been fired", "post_id", post.Id, "to_channel_id", r.ToChannelID, "delete_key", shared.Reacji.DeleteKey)
 			continue
@@ -119,14 +119,16 @@ func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, userID st
 			p.API.LogWarn("failed to create post", "error", appErr.Error())
 		}
 
-		new := &reacji.SharedPost{
-			PostID:       post.Id,
-			ToChannelID:  r.ToChannelID,
-			SharedPostID: newPost.Id,
-			Reacji:       *r,
-		}
-		if err := p.Store.Shared().Set(new, p.getConfiguration().DaysToKeepSharedRecord); err != nil {
-			p.API.LogWarn("failed to set share post", "post_id", post.Id, "to_channel_id", r.ToChannelID, err.Error())
+		if p.getConfiguration().DaysToKeepSharedRecord > 0 {
+			new := &reacji.SharedPost{
+				PostID:       post.Id,
+				ToChannelID:  r.ToChannelID,
+				SharedPostID: newPost.Id,
+				Reacji:       *r,
+			}
+			if err := p.Store.Shared().Set(new, p.getConfiguration().DaysToKeepSharedRecord); err != nil {
+				p.API.LogWarn("failed to set share post", "post_id", post.Id, "to_channel_id", r.ToChannelID, err.Error())
+			}
 		}
 	}
 }

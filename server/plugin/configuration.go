@@ -18,8 +18,8 @@ import (
 // If you add non-reference types to your configuration struct, be sure to rewrite Clone as a deep
 // copy appropriate for your types.
 type configuration struct {
-	AllowDuplicatedSharing bool `json:"allow_duplicated_sharing"`
-	DaysToKeepSharedRecord int  `json:"days_to_keep_shared_record"`
+	AllowDuplicateSharing  bool `json:"allowduplicatesharing"`
+	DaysToKeepSharedRecord int  `json:"daystokeepsharedrecord"`
 }
 
 // Clone shallow copies the configuration. Your implementation may require a deep copy if

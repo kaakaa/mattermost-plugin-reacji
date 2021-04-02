@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/mattermost/mattermost-server/v5/model"
@@ -39,7 +38,7 @@ func (s *SharedStore) Set(new *reacji.SharedPost, days int) error {
 	key := genKey(new.PostID, new.ToChannelID, new.Reacji.DeleteKey)
 
 	opt := model.PluginKVSetOptions{
-		ExpireInSeconds: int64(time.Hour * 24 * time.Duration(days)),
+		ExpireInSeconds: int64(60 * 60 * 24 * days),
 	}
 	ok, err := s.api.KVSetWithOptions(key, new.EncodeToByte(), opt)
 	if err != nil {
