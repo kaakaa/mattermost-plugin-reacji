@@ -212,6 +212,10 @@ else
 endif
 endif
 
+store-mocks: ## Creates mock files.
+	$(GO) install github.com/vektra/mockery/cmd/mockery@v1.1.2
+	mockery -dir server/store -all -output server/store/mockstore/mocks -note 'Regenerate this file using `make store-mocks`.'
+
 ## Disable the plugin.
 .PHONY: disable
 disable: detach
