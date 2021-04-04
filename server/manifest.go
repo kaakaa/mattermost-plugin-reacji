@@ -33,7 +33,7 @@ const manifestStr = `
         "key": "AllowDuplicateSharing",
         "display_name": "Allow duplicate sharing",
         "type": "bool",
-        "help_text": "",
+        "help_text": "When true, sharing will be performed every time reaction is added. When false, once a share is performed, the same post will not be shared until the number of days specified in **Days to keep shared record** has passed.",
         "placeholder": "",
         "default": false
       },
@@ -41,7 +41,7 @@ const manifestStr = `
         "key": "DaysToKeepSharedRecord",
         "display_name": "Days to keep shared record",
         "type": "number",
-        "help_text": "",
+        "help_text": "When **Allow duplicate sharing** is false, plugin will keep the record that post was shared for the period of time set here.",
         "placeholder": "",
         "default": 30
       }
