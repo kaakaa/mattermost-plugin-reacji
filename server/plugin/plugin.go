@@ -20,7 +20,7 @@ const (
 )
 
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
-type Plugin struct {
+type Plugin struct { // nolint: govet
 	plugin.MattermostPlugin
 	botUserID  string
 	reacjiList *reacji.List

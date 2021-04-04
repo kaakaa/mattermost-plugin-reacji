@@ -17,7 +17,7 @@ import (
 func TestPluginExecuteCommend(t *testing.T) {
 	customEmojiName := "custom_emoji"
 
-	for name, test := range map[string]struct {
+	for name, test := range map[string]struct { // nolint: govet
 		SetupAPI         func(*plugintest.API) *plugintest.API
 		SetupHelpers     func(*plugintest.Helpers) *plugintest.Helpers
 		SetupStore       func(*mockstore.Store) *mockstore.Store
@@ -272,7 +272,7 @@ func TestPluginExecuteCommend(t *testing.T) {
 			Args: &model.CommandArgs{
 				UserId:          testutils.GetUserID(),
 				ChannelId:       testutils.GetChannelID(),
-				Command:         fmt.Sprintf("/reacji remove"),
+				Command:         "/reacji remove",
 				ChannelMentions: model.ChannelMentionMap{"channel": testutils.GetChannelID2()},
 			},
 			ShouldError: false,
@@ -416,7 +416,7 @@ func TestPluginFindEmojis(t *testing.T) {
 }
 
 func TestPluginRefreshCaches(t *testing.T) {
-	for name, test := range map[string]struct {
+	for name, test := range map[string]struct { // nolint: govet
 		SetupAPI         func(*plugintest.API) *plugintest.API
 		SetupHelpers     func(*plugintest.Helpers) *plugintest.Helpers
 		SetupStore       func(*mockstore.Store) *mockstore.Store
