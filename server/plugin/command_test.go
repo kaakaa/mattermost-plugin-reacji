@@ -190,7 +190,7 @@ func TestPluginExecuteCommend(t *testing.T) {
 			Args: &model.CommandArgs{
 				UserId:    testutils.GetUserID(),
 				ChannelId: testutils.GetChannelID(),
-				Command:   fmt.Sprintf("/reacji add ~channel1"),
+				Command:   "/reacji add ~channel1",
 				ChannelMentions: model.ChannelMentionMap{
 					"channel1": testutils.GetChannelID2(),
 				},
@@ -210,7 +210,7 @@ func TestPluginExecuteCommend(t *testing.T) {
 			Args: &model.CommandArgs{
 				UserId:          testutils.GetUserID(),
 				ChannelId:       testutils.GetChannelID(),
-				Command:         fmt.Sprintf("/reacji add :+1:"),
+				Command:         "/reacji add :+1:",
 				ChannelMentions: model.ChannelMentionMap{},
 			},
 			ShouldError: false,
@@ -231,7 +231,7 @@ func TestPluginExecuteCommend(t *testing.T) {
 			Args: &model.CommandArgs{
 				UserId:    testutils.GetUserID(),
 				ChannelId: testutils.GetChannelID(),
-				Command:   fmt.Sprintf("/reacji add :+1: ~channel1"),
+				Command:   "/reacji add :+1: ~channel1",
 				ChannelMentions: model.ChannelMentionMap{
 					"channel1": testutils.GetChannelID2(),
 				},
