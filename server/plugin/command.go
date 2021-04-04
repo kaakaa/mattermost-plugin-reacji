@@ -365,7 +365,7 @@ func (p *Plugin) refreshCaches(userID string) (*model.CommandResponse, *model.Ap
 		}, nil
 	}
 	return &model.CommandResponse{
-		Text: fmt.Sprintf("successfuly removing %d caches", count),
+		Text: fmt.Sprintf("successfully removing %d caches", count),
 	}, nil
 }
 

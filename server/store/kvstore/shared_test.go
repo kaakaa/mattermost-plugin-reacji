@@ -9,6 +9,7 @@ import (
 	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSharedStoreGet(t *testing.T) {
@@ -17,7 +18,8 @@ func TestSharedStoreGet(t *testing.T) {
 		toChannelID := testutils.GetChannelID()
 		deleteKey := testutils.GetDeleteKey()
 
-		key := genKey(postID, toChannelID, deleteKey)
+		key, err := genKey(postID, toChannelID, deleteKey)
+		require.NoError(t, err)
 
 		shared := &reacji.SharedPost{}
 
@@ -37,7 +39,8 @@ func TestSharedStoreGet(t *testing.T) {
 		toChannelID := testutils.GetChannelID()
 		deleteKey := testutils.GetDeleteKey()
 
-		key := genKey(postID, toChannelID, deleteKey)
+		key, err := genKey(postID, toChannelID, deleteKey)
+		require.NoError(t, err)
 
 		api := &plugintest.API{}
 		helpers := &plugintest.Helpers{}
@@ -56,7 +59,8 @@ func TestSharedStoreGet(t *testing.T) {
 		deleteKey := testutils.GetDeleteKey()
 		appErr := &model.AppError{}
 
-		key := genKey(postID, toChannelID, deleteKey)
+		key, err := genKey(postID, toChannelID, deleteKey)
+		require.NoError(t, err)
 
 		api := &plugintest.API{}
 		helpers := &plugintest.Helpers{}
@@ -75,7 +79,8 @@ func TestSharedStoreGet(t *testing.T) {
 		deleteKey := testutils.GetDeleteKey()
 		appErr := &model.AppError{}
 
-		key := genKey(postID, toChannelID, deleteKey)
+		key, err := genKey(postID, toChannelID, deleteKey)
+		require.NoError(t, err)
 
 		api := &plugintest.API{}
 		helpers := &plugintest.Helpers{}
@@ -99,7 +104,8 @@ func TestSharedStoreSet(t *testing.T) {
 				DeleteKey: testutils.GetDeleteKey(),
 			},
 		}
-		key := genKey(shared.PostID, shared.ToChannelID, shared.Reacji.DeleteKey)
+		key, err := genKey(shared.PostID, shared.ToChannelID, shared.Reacji.DeleteKey)
+		require.NoError(t, err)
 		days := 1
 		opt := model.PluginKVSetOptions{
 			ExpireInSeconds: int64(60 * 60 * 24 * days),
@@ -112,7 +118,7 @@ func TestSharedStoreSet(t *testing.T) {
 		defer helpers.AssertExpectations(t)
 		store := setupTestStore(api, helpers)
 
-		err := store.Shared().Set(shared, days)
+		err = store.Shared().Set(shared, days)
 		assert.NoError(t, err)
 	})
 	t.Run("KVSetWithOptions fail", func(t *testing.T) {
@@ -123,7 +129,8 @@ func TestSharedStoreSet(t *testing.T) {
 				DeleteKey: testutils.GetDeleteKey(),
 			},
 		}
-		key := genKey(shared.PostID, shared.ToChannelID, shared.Reacji.DeleteKey)
+		key, err := genKey(shared.PostID, shared.ToChannelID, shared.Reacji.DeleteKey)
+		require.NoError(t, err)
 		days := 1
 		opt := model.PluginKVSetOptions{
 			ExpireInSeconds: int64(60 * 60 * 24 * days),
@@ -138,7 +145,7 @@ func TestSharedStoreSet(t *testing.T) {
 		defer helpers.AssertExpectations(t)
 		store := setupTestStore(api, helpers)
 
-		err := store.Shared().Set(shared, days)
+		err = store.Shared().Set(shared, days)
 		assert.Error(t, err)
 	})
 	t.Run("could not set data", func(t *testing.T) {
@@ -149,7 +156,8 @@ func TestSharedStoreSet(t *testing.T) {
 				DeleteKey: testutils.GetDeleteKey(),
 			},
 		}
-		key := genKey(shared.PostID, shared.ToChannelID, shared.Reacji.DeleteKey)
+		key, err := genKey(shared.PostID, shared.ToChannelID, shared.Reacji.DeleteKey)
+		require.NoError(t, err)
 		days := 1
 		opt := model.PluginKVSetOptions{
 			ExpireInSeconds: int64(60 * 60 * 24 * days),
@@ -162,7 +170,7 @@ func TestSharedStoreSet(t *testing.T) {
 		defer helpers.AssertExpectations(t)
 		store := setupTestStore(api, helpers)
 
-		err := store.Shared().Set(shared, days)
+		err = store.Shared().Set(shared, days)
 		assert.Error(t, err)
 	})
 }
@@ -264,6 +272,7 @@ func TestSharedStoreDeleteAll(t *testing.T) {
 }
 
 func TestSharedStoreGenKey(t *testing.T) {
-	key := genKey(testutils.GetPostID(), testutils.GetChannelID(), testutils.GetDeleteKey())
+	key, err := genKey(testutils.GetPostID(), testutils.GetChannelID(), testutils.GetDeleteKey())
+	assert.NoError(t, err)
 	assert.Equal(t, "shared-7448bcb561b4c275e4eaf310714e3400", key)
 }

@@ -1,7 +1,7 @@
 package kvstore
 
 import (
-	"crypto/md5"
+	"crypto/md5" // nolint:gosec
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -19,10 +19,14 @@ type SharedStore struct {
 }
 
 func (s *SharedStore) Get(postID, toChannelID, deleteKey string) (*reacji.SharedPost, error) {
-	key := genKey(postID, toChannelID, deleteKey)
-	b, err := s.api.KVGet(key)
+	key, err := genKey(postID, toChannelID, deleteKey)
 	if err != nil {
 		return nil, err
+	}
+
+	b, appErr := s.api.KVGet(key)
+	if appErr != nil {
+		return nil, fmt.Errorf("failed to get shared post. %w", appErr)
 	}
 	if b == nil {
 		return nil, nil
@@ -35,14 +39,17 @@ func (s *SharedStore) Get(postID, toChannelID, deleteKey string) (*reacji.Shared
 }
 
 func (s *SharedStore) Set(new *reacji.SharedPost, days int) error {
-	key := genKey(new.PostID, new.ToChannelID, new.Reacji.DeleteKey)
+	key, err := genKey(new.PostID, new.ToChannelID, new.Reacji.DeleteKey)
+	if err != nil {
+		return err
+	}
 
 	opt := model.PluginKVSetOptions{
 		ExpireInSeconds: int64(60 * 60 * 24 * days),
 	}
-	ok, err := s.api.KVSetWithOptions(key, new.EncodeToByte(), opt)
-	if err != nil {
-		return err
+	ok, appErr := s.api.KVSetWithOptions(key, new.EncodeToByte(), opt)
+	if appErr != nil {
+		return fmt.Errorf("failed to set shared post. %w", appErr)
 	}
 	if !ok {
 		return errors.New("failed to store shared post")
@@ -66,10 +73,13 @@ func (s *SharedStore) DeleteAll() (int, error) {
 	return count, nil
 }
 
-func genKey(postID, toChannelID, deleteKey string) string {
-	h := md5.New()
+func genKey(postID, toChannelID, deleteKey string) (string, error) {
+	h := md5.New() // nolint:gosec
 	defer h.Reset()
-	h.Write([]byte(fmt.Sprintf("%s-%s-%s", postID, toChannelID, deleteKey)))
+	_, err := h.Write([]byte(fmt.Sprintf("%s-%s-%s", postID, toChannelID, deleteKey)))
+	if err != nil {
+		return "", err
+	}
 	v := hex.EncodeToString(h.Sum(nil))
-	return fmt.Sprintf("%s%s", SharedKeyHeader, v)
+	return fmt.Sprintf("%s%s", SharedKeyHeader, v), nil
 }
