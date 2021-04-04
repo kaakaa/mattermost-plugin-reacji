@@ -26,13 +26,13 @@ func (p *Plugin) registerCommand() error {
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
 	userID := args.UserId
 	FromChannelID := args.ChannelId
-	cmdElements := strings.Split(args.Command, " ")
+	cmdElements := strings.Split(strings.TrimSpace(args.Command), " ")
 
-	if len(cmdElements) == 1 || cmdElements[0] != "/"+CommandNameReacji {
+	if len(cmdElements) == 0 || cmdElements[0] != "/"+CommandNameReacji {
 		p.API.LogError("invalid command", "command", cmdElements[0])
 		return &model.CommandResponse{Text: "invalid command"}, nil
 	}
-	if len(cmdElements) == 2 && len(cmdElements[1]) == 0 {
+	if len(cmdElements) == 1 {
 		return p.help()
 	}
 	p.API.LogDebug("execute reacji command", "subcommand", cmdElements[1])
@@ -369,15 +369,18 @@ func (p *Plugin) refreshCaches(userID string) (*model.CommandResponse, *model.Ap
 	}, nil
 }
 
+const commandHelpMessage = `Manage Reacjis commands
+* **/reacji add :EMOJI: ~CHANNEL**:Register new reacji. If you attach EMOJI to the post, the post will share to CHANNEL.
+* **/reacji list [-all]**:List reacjis that is registered in channel. With **--all** list all registered reacjis in this server.
+* **/reacji remove [Deletekey...]**: [CREATOR or SYSTEM_ADMIN only] Remove reacjis by DeleteKey.
+* **/reacji remove-all**: [SYSTEM_ADMIN onlye] Remove all existing reacjis.
+* **/reacji refresh-caches**: [SYSTEM_ADMIN only] Delete all caches.
+* **/reacji help**: Show help
+`
+
 func (p *Plugin) help() (*model.CommandResponse, *model.AppError) {
 	return &model.CommandResponse{
-		Text: "Manage Reacjis commands\n" +
-			"* `/reacji add :EMOJI: ~CHANNEL`:Register new reacji. If you attach EMOJI to the post, the post will share to CHANNEL.\n" +
-			"* `/reacji list [-all]`:List reacjis that is registered in channel. With `--all` list all registered reacjis in this server.\n" +
-			"* `/reacji remove [Deletekey...]`: [CREATOR or SYSTEM_ADMIN only] Remove reacjis by DeleteKey.\n" +
-			"* `/reacji remove-all`: [SYSTEM_ADMIN onlye] Remove all existing reacjis.\n" +
-			"* `/reacji refresh-caches`: [SYSTEM_ADMIN only] Delete all caches.\n" +
-			"* `/reacji help`: Show help",
+		Text: commandHelpMessage,
 	}, nil
 }
 
