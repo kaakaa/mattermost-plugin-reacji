@@ -39,6 +39,10 @@ func (s *SharedStore) Get(postID, toChannelID, deleteKey string) (*reacji.Shared
 }
 
 func (s *SharedStore) Set(new *reacji.SharedPost, days int) error {
+	if days <= 0 {
+		return nil
+	}
+
 	key, err := genKey(new.PostID, new.ToChannelID, new.Reacji.DeleteKey)
 	if err != nil {
 		return err
