@@ -337,7 +337,7 @@ func (p *Plugin) list(userID, channelID string) (*model.CommandResponse, *model.
 		contents = append(contents, fmt.Sprintf("| :%s: | %s | %s | %s | %s | %s |", r.EmojiName, teamName, from, to, creator, r.DeleteKey))
 	}
 	if len(contents) == 0 {
-		return &model.CommandResponse{Text: "There is no Reacji in this channel. Add Reacji by `/reacji` command or  or list reacjis in all channels by `/reacji list --all` command."}, nil
+		return &model.CommandResponse{Text: "There is no Reacji in this channel. Add Reacji by `/reacji add` command or  or list reacjis in all channels by `/reacji list --all` command."}, nil
 	}
 
 	table := []string{
