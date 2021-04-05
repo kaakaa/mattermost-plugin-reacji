@@ -2,7 +2,7 @@
     "id": "com.github.kaakaa.mattermost-plugin-reacji",
     "name": "Reacji Channeler",
     "description": "Move post to other channel by attaching reactions",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "min_server_version": "5.30.0",
     "server": {
         "executables": {
