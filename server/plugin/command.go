@@ -271,7 +271,7 @@ func (p *Plugin) listAll(userID string) (*model.CommandResponse, *model.AppError
 
 		contents = append(contents, fmt.Sprintf("| :%s: | %s | %s | %s | %s | %s |", r.EmojiName, teamName, from, to, creator, r.DeleteKey))
 	}
-	if len(contents) == 2 {
+	if len(contents) == 0 {
 		return &model.CommandResponse{Text: "There is no Reacji. Add Reacji by `/reacji add` command."}, nil
 	}
 	table := []string{
