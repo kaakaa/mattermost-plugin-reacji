@@ -226,13 +226,9 @@ func (p *Plugin) forceRemoveAll(userID string) (*model.CommandResponse, *model.A
 }
 
 func (p *Plugin) listAll(userID string) (*model.CommandResponse, *model.AppError) {
-	table := []string{
-		"### All reacjis",
-		"",
-		"| Emoji | Team | From | To | Creator | DeleteKey | ",
-	}
-	table = append(table, "|:-----:|:-----|:-----|:---|:--------|:----------|")
 	channelCaches := map[string]*model.Channel{}
+
+	var contents []string
 	for _, r := range p.reacjiList.Reacjis {
 		from := fmt.Sprintf("Notfound(ID: %s)", r.FromChannelID)
 		if ch, ok := channelCaches[r.FromChannelID]; ok {
@@ -273,24 +269,25 @@ func (p *Plugin) listAll(userID string) (*model.CommandResponse, *model.AppError
 			creator = "Unknown"
 		}
 
-		table = append(table, fmt.Sprintf("| :%s: | %s | %s | %s | %s | %s |", r.EmojiName, teamName, from, to, creator, r.DeleteKey))
+		contents = append(contents, fmt.Sprintf("| :%s: | %s | %s | %s | %s | %s |", r.EmojiName, teamName, from, to, creator, r.DeleteKey))
 	}
-	if len(table) == 2 {
-		return &model.CommandResponse{Text: "There is no Reacji. Add Reacji by `/reacji` command."}, nil
+	if len(contents) == 0 {
+		return &model.CommandResponse{Text: "There is no Reacji. Add Reacji by `/reacji add` command."}, nil
 	}
+	table := []string{
+		"### All reacjis",
+		"",
+		"| Emoji | Team | From | To | Creator | DeleteKey | ",
+	}
+	table = append(table, "|:-----:|:-----|:-----|:---|:--------|:----------|")
+	table = append(table, contents...)
+
 	return &model.CommandResponse{
 		Text: strings.Join(table, "\n"),
 	}, nil
 }
 
 func (p *Plugin) list(userID, channelID string) (*model.CommandResponse, *model.AppError) {
-	table := []string{
-		"### Reacjis in this channel",
-		"",
-		"| Emoji | Team | From | To | Creator | DeleteKey | ",
-	}
-	table = append(table, "|:-----:|:-----|:-----|:---|:--------|:----------|")
-
 	channelCaches := map[string]*model.Channel{}
 
 	fromChannel, appErr := p.API.GetChannel(channelID)
@@ -302,6 +299,7 @@ func (p *Plugin) list(userID, channelID string) (*model.CommandResponse, *model.
 	channelCaches[channelID] = fromChannel
 	from := fmt.Sprintf("~%s", fromChannel.Name)
 
+	var contents []string
 	for _, r := range p.reacjiList.Reacjis {
 		// Skip if reacji from channel is differ from channel where command is executed
 		if r.FromChannelID != channelID {
@@ -336,11 +334,20 @@ func (p *Plugin) list(userID, channelID string) (*model.CommandResponse, *model.
 			creator = "Unknown"
 		}
 
-		table = append(table, fmt.Sprintf("| :%s: | %s | %s | %s | %s | %s |", r.EmojiName, teamName, from, to, creator, r.DeleteKey))
+		contents = append(contents, fmt.Sprintf("| :%s: | %s | %s | %s | %s | %s |", r.EmojiName, teamName, from, to, creator, r.DeleteKey))
 	}
-	if len(table) == 2 {
-		return &model.CommandResponse{Text: "There is no Reacji in this channel. Add Reacji by `/reacji` command."}, nil
+	if len(contents) == 0 {
+		return &model.CommandResponse{Text: "There is no Reacji in this channel. Add Reacji by `/reacji add` command or  or list reacjis in all channels by `/reacji list --all` command."}, nil
 	}
+
+	table := []string{
+		"### Reacjis in this channel",
+		"",
+		"| Emoji | Team | From | To | Creator | DeleteKey | ",
+	}
+	table = append(table, "|:-----:|:-----|:-----|:---|:--------|:----------|")
+	table = append(table, contents...)
+
 	return &model.CommandResponse{
 		Text: strings.Join(table, "\n"),
 	}, nil
