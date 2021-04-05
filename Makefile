@@ -4,7 +4,7 @@ CURL ?= $(shell command -v curl 2> /dev/null)
 MM_DEBUG ?=
 MANIFEST_FILE ?= plugin.json
 GOPATH ?= $(shell go env GOPATH)
-GO_TEST_FLAGS ?= -race
+GO_TEST_FLAGS ?= -race -gcflags=-l
 GO_BUILD_FLAGS ?=
 MM_UTILITIES_DIR ?= ../mattermost-utilities
 DLV_DEBUG_PORT := 2346
@@ -211,6 +211,10 @@ else
 	cd $(MM_UTILITIES_DIR) && npm install && npm run babel && node mmjstool/build/index.js i18n extract-webapp --webapp-dir $(PWD)/webapp
 endif
 endif
+
+store-mocks: ## Creates mock files.
+	$(GO) install github.com/vektra/mockery/cmd/mockery@v1.1.2
+	mockery -dir server/store -all -output server/store/mockstore/mocks -note 'Regenerate this file using `make store-mocks`.'
 
 ## Disable the plugin.
 .PHONY: disable

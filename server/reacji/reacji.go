@@ -17,6 +17,13 @@ type Reacji struct {
 	EmojiName     string `json:"emoji_name"`
 }
 
+type SharedPost struct {
+	PostID       string `json:"post_id"`
+	ToChannelID  string `json:"to_channel_id"`
+	SharedPostID string `json:"shared_post_id"`
+	Reacji       Reacji `json:"reacji"`
+}
+
 func (l *List) Clone() *List {
 	var dst []*Reacji
 	for _, r := range l.Reacjis {
@@ -47,4 +54,17 @@ func DecodeListFromByte(b []byte) *List {
 		return nil
 	}
 	return &l
+}
+
+func (p *SharedPost) EncodeToByte() []byte {
+	b, _ := json.Marshal(p)
+	return b
+}
+
+func DecodeSharedPostFromByte(b []byte) *SharedPost {
+	p := SharedPost{}
+	if err := json.Unmarshal(b, &p); err != nil {
+		return nil
+	}
+	return &p
 }

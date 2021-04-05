@@ -26,13 +26,13 @@ func (p *Plugin) registerCommand() error {
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
 	userID := args.UserId
 	FromChannelID := args.ChannelId
-	cmdElements := strings.Split(args.Command, " ")
+	cmdElements := strings.Split(strings.TrimSpace(args.Command), " ")
 
-	if len(cmdElements) == 1 || cmdElements[0] != "/"+CommandNameReacji {
+	if len(cmdElements) == 0 || cmdElements[0] != "/"+CommandNameReacji {
 		p.API.LogError("invalid command", "command", cmdElements[0])
 		return &model.CommandResponse{Text: "invalid command"}, nil
 	}
-	if len(cmdElements) == 2 && len(cmdElements[1]) == 0 {
+	if len(cmdElements) == 1 {
 		return p.help()
 	}
 	p.API.LogDebug("execute reacji command", "subcommand", cmdElements[1])
@@ -67,6 +67,8 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 			return p.listAll(userID)
 		}
 		return p.list(userID, FromChannelID)
+	case "refresh-caches":
+		return p.refreshCaches(userID)
 	case "help":
 		return p.help()
 	default:
@@ -120,7 +122,7 @@ func (p *Plugin) storeReacjis(userID, teamID, fromChannelID string, emojiNames, 
 	if count == 0 {
 		return errors.New("reacji is already registered")
 	}
-	if err := p.Store.ReacjiStore.Update(p.reacjiList, new); err != nil {
+	if err := p.Store.Reacji().Update(p.reacjiList, new); err != nil {
 		return err
 	}
 	p.reacjiList = new
@@ -152,7 +154,7 @@ func (p *Plugin) remove(userID string, keys []string) (*model.CommandResponse, *
 			new.Reacjis = append(new.Reacjis, r)
 		}
 	}
-	if err := p.Store.ReacjiStore.Update(p.reacjiList, new); err != nil {
+	if err := p.Store.Reacji().Update(p.reacjiList, new); err != nil {
 		return &model.CommandResponse{Text: "failed to remove reacjis"}, nil
 	}
 	p.reacjiList = new
@@ -188,7 +190,7 @@ func (p *Plugin) removeAll(userID string) (*model.CommandResponse, *model.AppErr
 		}, nil
 	}
 	new := &reacji.List{}
-	if err := p.Store.ReacjiStore.Update(p.reacjiList, new); err != nil {
+	if err := p.Store.Reacji().Update(p.reacjiList, new); err != nil {
 		return &model.CommandResponse{
 			Text: err.Error(),
 		}, nil
@@ -198,6 +200,7 @@ func (p *Plugin) removeAll(userID string) (*model.CommandResponse, *model.AppErr
 		Text: "All reacjis are removed.",
 	}, nil
 }
+
 func (p *Plugin) forceRemoveAll(userID string) (*model.CommandResponse, *model.AppError) {
 	// TODO: confirm button
 	if b, appErr := p.HasAdminPermission(nil, userID); !b {
@@ -206,12 +209,12 @@ func (p *Plugin) forceRemoveAll(userID string) (*model.CommandResponse, *model.A
 			appendix = fmt.Sprintf("(%s)", appErr.Error())
 		}
 		return &model.CommandResponse{
-			Text: "Failed to remove emojis due to nvalid permission " + appendix,
+			Text: "Failed to remove emojis due to invalid permission " + appendix,
 		}, nil
 	}
 
 	new := &reacji.List{}
-	if err := p.Store.ReacjiStore.ForceUpdate(new); err != nil {
+	if err := p.Store.Reacji().ForceUpdate(new); err != nil {
 		return &model.CommandResponse{
 			Text: err.Error(),
 		}, nil
@@ -343,14 +346,41 @@ func (p *Plugin) list(userID, channelID string) (*model.CommandResponse, *model.
 	}, nil
 }
 
+func (p *Plugin) refreshCaches(userID string) (*model.CommandResponse, *model.AppError) {
+	// TODO: confirm button
+	if b, appErr := p.HasAdminPermission(nil, userID); !b {
+		appendix := ""
+		if appErr != nil {
+			appendix = fmt.Sprintf("(%s)", appErr.Error())
+		}
+		return &model.CommandResponse{
+			Text: "failed to refresh caches due to invalid permission " + appendix,
+		}, appErr
+	}
+
+	count, err := p.Store.Shared().DeleteAll()
+	if err != nil {
+		return &model.CommandResponse{
+			Text: "failed to refresh caches due to database error " + err.Error(),
+		}, nil
+	}
+	return &model.CommandResponse{
+		Text: fmt.Sprintf("successfully removing %d caches", count),
+	}, nil
+}
+
+const commandHelpMessage = `Manage Reacjis commands
+* **/reacji add :EMOJI: ~CHANNEL**:Register new reacji. If you attach EMOJI to the post, the post will share to CHANNEL.
+* **/reacji list [-all]**:List reacjis that is registered in channel. With **--all** list all registered reacjis in this server.
+* **/reacji remove [Deletekey...]**: [CREATOR or SYSTEM_ADMIN only] Remove reacjis by DeleteKey.
+* **/reacji remove-all**: [SYSTEM_ADMIN onlye] Remove all existing reacjis.
+* **/reacji refresh-caches**: [SYSTEM_ADMIN only] Delete all caches.
+* **/reacji help**: Show help
+`
+
 func (p *Plugin) help() (*model.CommandResponse, *model.AppError) {
 	return &model.CommandResponse{
-		Text: "Manage Reacjis commands\n" +
-			"* `/reacji add :EMOJI: ~CHANNEL`:Register new reacji. If you attach EMOJI to the post, the post will share to CHANNEL.\n" +
-			"* `/reacji list [-all]`:List reacjis that is registered in channel. With `--all` list all registered reacjis in this server.\n" +
-			"* `/reacji remove [Deletekey...]`: Remove reacjis by DeleteKey (creator or system admin only)\n" +
-			"* `/reacji remove-all`: Remove all existing reacjis (system admin only)`\n" +
-			"* `/reacji help`: Show help",
+		Text: commandHelpMessage,
 	}, nil
 }
 
@@ -358,8 +388,9 @@ func createAutoCompleteData() *model.AutocompleteData {
 	suggestions := model.NewAutocompleteData("reacji", "[command]", "Available commands: add, list, remove, remove-all, help")
 	suggestions.AddCommand(model.NewAutocompleteData("add", ":EMOJI: ~CHANNEL", "Register new reacji. If you attach EMOJI to the post, the post will share to CHANNEL."))
 	suggestions.AddCommand(model.NewAutocompleteData("list", "[--all]", "List reacjis in this channel. With `--all` list all registered reacjis in this server."))
-	suggestions.AddCommand(model.NewAutocompleteData("remove", "[DeleteKey...]", "Remove reacji by DeleteKey (creator or system admin only). You can see `DeleteKey` by `/reacji list`"))
-	suggestions.AddCommand(model.NewAutocompleteData("remove-all", "", "Remove all reacjis in this server (system admin only)"))
+	suggestions.AddCommand(model.NewAutocompleteData("remove", "[DeleteKey...]", "[CREATOR or SYSTEM_ADMIN only] Remove reacji by DeleteKey. You can see `DeleteKey` by `/reacji list`"))
+	suggestions.AddCommand(model.NewAutocompleteData("remove-all", "", "[SYSTEM_ADMIN only] Remove all reacjis in this server."))
+	suggestions.AddCommand(model.NewAutocompleteData("refresh-caches", "", "[SYSTEM_ADMIN only] Delete all caches. Reacji plugin caches data about shared post for a certain period in order to prevent duplicate sharing."))
 	suggestions.AddCommand(model.NewAutocompleteData("help", "", "Show help"))
 	return suggestions
 }

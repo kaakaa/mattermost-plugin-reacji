@@ -8,6 +8,7 @@ import (
 
 	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
+	"github.com/kaakaa/mattermost-plugin-reacji/server/store/kvstore"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/plugin"
 )
@@ -19,11 +20,11 @@ const (
 )
 
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
-type Plugin struct {
+type Plugin struct { // nolint: govet
 	plugin.MattermostPlugin
 	botUserID  string
 	reacjiList *reacji.List
-	Store      *store.Store
+	Store      store.Store
 
 	// configurationLock synchronizes access to the configuration.
 	configurationLock sync.RWMutex
@@ -59,8 +60,8 @@ func (p *Plugin) OnActivate() error {
 	}
 	p.botUserID = botUserID
 
-	p.Store = store.NewStore(p.API)
-	reacjiList, err := p.Store.ReacjiStore.Get()
+	p.Store = kvstore.NewStore(p.API, p.Helpers)
+	reacjiList, err := p.Store.Reacji().Get()
 	if err != nil {
 		return err
 	}
@@ -83,10 +84,22 @@ func (p *Plugin) OnDeactivate() error {
 }
 
 func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, userID string) {
-	for _, reacji := range reacjis {
-		fromChannel, appErr := p.API.GetChannel(reacji.FromChannelID)
+	for _, r := range reacjis {
+		shared, err := p.Store.Shared().Get(post.Id, r.ToChannelID, r.DeleteKey)
+		if err != nil {
+			p.API.LogWarn("failed to get shared post", "post_id", post.Id, "to_channel_id", r.ToChannelID, "details", err.Error())
+			continue
+		}
+
+		if shared != nil && !p.getConfiguration().AllowDuplicateSharing {
+			// Skip sharing because this post have already been shared
+			p.API.LogDebug("this reacji has already been fired", "post_id", post.Id, "to_channel_id", r.ToChannelID, "delete_key", shared.Reacji.DeleteKey)
+			continue
+		}
+
+		fromChannel, appErr := p.API.GetChannel(r.FromChannelID)
 		if appErr != nil {
-			p.API.LogWarn("failed to get channel", "channel_id", reacji.FromChannelID, "error", appErr.Error())
+			p.API.LogWarn("failed to get channel", "channel_id", r.FromChannelID, "error", appErr.Error())
 			continue
 		}
 		team, appErr := p.API.GetTeam(fromChannel.TeamId)
@@ -95,15 +108,27 @@ func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, userID st
 			continue
 		}
 
-		p.API.LogDebug("share post", "channel_id", reacji.ToChannelID, "post_id", post.Id, "user_id", p.botUserID)
+		p.API.LogDebug("share post", "channel_id", r.ToChannelID, "post_id", post.Id, "user_id", p.botUserID)
 		newPost := &model.Post{
 			Type:      model.POST_DEFAULT,
 			UserId:    p.botUserID,
-			ChannelId: reacji.ToChannelID,
+			ChannelId: r.ToChannelID,
 			Message:   fmt.Sprintf("> Shared from ~%s. ([original post](%s))", fromChannel.Name, p.makePostLink(team.Name, post.Id)),
 		}
-		if _, appErr := p.API.CreatePost(newPost); appErr != nil {
+		if newPost, appErr = p.API.CreatePost(newPost); appErr != nil {
 			p.API.LogWarn("failed to create post", "error", appErr.Error())
+		}
+
+		if p.getConfiguration().DaysToKeepSharedRecord > 0 {
+			new := &reacji.SharedPost{
+				PostID:       post.Id,
+				ToChannelID:  r.ToChannelID,
+				SharedPostID: newPost.Id,
+				Reacji:       *r,
+			}
+			if err := p.Store.Shared().Set(new, p.getConfiguration().DaysToKeepSharedRecord); err != nil {
+				p.API.LogWarn("failed to set share post", "post_id", post.Id, "to_channel_id", r.ToChannelID, err.Error())
+			}
 		}
 	}
 }

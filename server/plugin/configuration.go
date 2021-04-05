@@ -18,6 +18,8 @@ import (
 // If you add non-reference types to your configuration struct, be sure to rewrite Clone as a deep
 // copy appropriate for your types.
 type configuration struct {
+	AllowDuplicateSharing  bool `json:"allowduplicatesharing"`
+	DaysToKeepSharedRecord int  `json:"daystokeepsharedrecord"`
 }
 
 // Clone shallow copies the configuration. Your implementation may require a deep copy if
@@ -76,6 +78,10 @@ func (p *Plugin) OnConfigurationChange() error {
 	// Load the public configuration fields from the Mattermost server configuration.
 	if err := p.API.LoadPluginConfiguration(configuration); err != nil {
 		return errors.Wrap(err, "failed to load plugin configuration")
+	}
+
+	if configuration.DaysToKeepSharedRecord < 0 {
+		return errors.New("negative days not allowed")
 	}
 
 	p.setConfiguration(configuration)
