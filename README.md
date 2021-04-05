@@ -19,7 +19,7 @@ Download plugin from [Releases](https://github.com/kaakaa/mattermost-plugin-reac
 
 ### Commands
 
-````
+```
 /reacji add :EMOJI: ~CHANNEL: Register new reacji. If you attach EMOJI to the post, the post will share to CHANNEL.
 /reacji list [-all]: List reacjis that is registered in channel. With **--all** list all registered reacjis in this server.
 /reacji remove [Deletekey...]: [CREATOR or SYSTEM_ADMIN only] Remove reacjis by DeleteKey.
@@ -35,4 +35,3 @@ Download plugin from [Releases](https://github.com/kaakaa/mattermost-plugin-reac
 ## Licence
 
 See [LICENSE](./LICENSE)
-````
