@@ -37,6 +37,9 @@ func (p *Plugin) ReactionHasBeenAdded(c *plugin.Context, reaction *model.Reactio
 
 // MessageWillBePosted expand contents of permalink of local post
 func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*model.Post, string) {
+	if _, ok := post.GetProps()[SharedPostPropKey]; !ok {
+		return post, ""
+	}
 	siteURL := p.API.GetConfig().ServiceSettings.SiteURL
 	channel, appErr := p.API.GetChannel(post.ChannelId)
 	if appErr != nil {
