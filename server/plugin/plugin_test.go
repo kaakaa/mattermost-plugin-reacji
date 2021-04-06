@@ -24,6 +24,7 @@ func setupTestPlugin(api *plugintest.API, helpers *plugintest.Helpers, store *mo
 	p.setConfiguration(&configuration{
 		AllowDuplicateSharing:  true,
 		DaysToKeepSharedRecord: 1,
+		MaxReacjis:             30,
 	})
 
 	p.SetAPI(api)

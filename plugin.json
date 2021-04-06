@@ -28,6 +28,13 @@
                 "type": "number",
                 "help_text": "When **Allow duplicate sharing** is false, plugin will keep the record that post was shared for the period of time set here.",
                 "default": 30
+            },
+            {
+                "key": "MaxReacjis",
+                "display_name": "Max Reacjis",
+                "type": "number",
+                "help_text": "Maximum number of reacjis.",
+                "default": 30
             }
         ]
     }
