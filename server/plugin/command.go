@@ -38,6 +38,9 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	p.API.LogDebug("execute reacji command", "subcommand", cmdElements[1])
 	switch cmdElements[1] {
 	case "add":
+		if len(p.reacjiList.Reacjis) >= p.getConfiguration().MaxReacjis {
+			return &model.CommandResponse{Text: "Failed to add reacjis because the number of reacjis reaches maximum. Remove unnecessary reacjis or change the value of MaxReacjis from plugin setting in system console, and try again."}, nil
+		}
 		emojiNames := p.findEmojis(cmdElements[2:])
 		var toChannelIds []string
 		for _, id := range args.ChannelMentions {

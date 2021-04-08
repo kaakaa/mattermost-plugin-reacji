@@ -44,6 +44,14 @@ const manifestStr = `
         "help_text": "When **Allow duplicate sharing** is false, plugin will keep the record that post was shared for the period of time set here.",
         "placeholder": "",
         "default": 30
+      },
+      {
+        "key": "MaxReacjis",
+        "display_name": "Days to keep shared record",
+        "type": "number",
+        "help_text": "When **Allow duplicate sharing** is false, plugin will keep the record that post was shared for the period of time set here.",
+        "placeholder": "",
+        "default": 30
       }
     ]
   }

@@ -20,6 +20,7 @@ import (
 type configuration struct {
 	AllowDuplicateSharing  bool `json:"allowduplicatesharing"`
 	DaysToKeepSharedRecord int  `json:"daystokeepsharedrecord"`
+	MaxReacjis             int  `json:"maxreacjis"`
 }
 
 // Clone shallow copies the configuration. Your implementation may require a deep copy if
@@ -82,6 +83,10 @@ func (p *Plugin) OnConfigurationChange() error {
 
 	if configuration.DaysToKeepSharedRecord < 0 {
 		return errors.New("negative days not allowed")
+	}
+
+	if configuration.MaxReacjis <= 0 {
+		return errors.New("max Reacjis must be greater than 0")
 	}
 
 	p.setConfiguration(configuration)

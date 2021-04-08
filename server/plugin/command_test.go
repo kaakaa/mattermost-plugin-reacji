@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/store/mockstore"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/utils/testutils"
 	"github.com/mattermost/mattermost-server/v5/model"
@@ -15,6 +16,32 @@ import (
 )
 
 func TestPluginExecuteCommend(t *testing.T) {
+	t.Run("error, exceed maximum", func(t *testing.T) {
+		a := &plugintest.API{}
+		a.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
+		defer a.AssertExpectations(t)
+		h := &plugintest.Helpers{}
+		defer h.AssertExpectations(t)
+		s := &mockstore.Store{}
+		defer s.AssertExpectations(t)
+
+		p := setupTestPlugin(a, h, s)
+		for i := 0; i < p.getConfiguration().MaxReacjis+1; i++ {
+			p.reacjiList.Reacjis = append(p.reacjiList.Reacjis, &reacji.Reacji{})
+		}
+		resp, appErr := p.ExecuteCommand(&plugin.Context{}, &model.CommandArgs{
+			UserId:          testutils.GetUserID(),
+			ChannelId:       testutils.GetChannelID(),
+			Command:         "/reacji add :+1: ~channel",
+			ChannelMentions: model.ChannelMentionMap{"channel": testutils.GetChannelID2()},
+		})
+
+		assert.Nil(t, appErr)
+		assert.Equal(t, &model.CommandResponse{
+			Text: "Failed to add reacjis because the number of reacjis reaches maximum. Remove unnecessary reacjis or change the value of MaxReacjis from plugin setting in system console, and try again.",
+		}, resp)
+	})
+
 	customEmojiName := "custom_emoji"
 
 	for name, test := range map[string]struct { // nolint: govet
