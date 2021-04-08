@@ -15,7 +15,7 @@ const manifestStr = `
   "id": "com.github.kaakaa.mattermost-plugin-reacji",
   "name": "Reacji Channeler",
   "description": "Move post to other channel by attaching reactions",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "min_server_version": "5.30.0",
   "server": {
     "executables": {
@@ -27,7 +27,7 @@ const manifestStr = `
   },
   "settings_schema": {
     "header": "",
-    "footer": "",
+    "footer": "To report an issue, make a suggestion, or submit a contribution, [check the repository](https://github.com/kaakaa/mattermost-plugin-reacji).",
     "settings": [
       {
         "key": "AllowDuplicateSharing",
@@ -47,9 +47,9 @@ const manifestStr = `
       },
       {
         "key": "MaxReacjis",
-        "display_name": "Days to keep shared record",
+        "display_name": "Max Reacjis",
         "type": "number",
-        "help_text": "When **Allow duplicate sharing** is false, plugin will keep the record that post was shared for the period of time set here.",
+        "help_text": "Maximum number of reacjis.",
         "placeholder": "",
         "default": 30
       }
