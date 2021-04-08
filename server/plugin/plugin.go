@@ -17,6 +17,7 @@ const (
 	CommandNameReacji = "reacji"
 	botUserName       = "reacji-bot"
 	botDisplayName    = "Reacji Bot"
+	SharedPostPropKey = "reacji-shared"
 )
 
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
@@ -115,6 +116,8 @@ func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, userID st
 			ChannelId: r.ToChannelID,
 			Message:   fmt.Sprintf("> Shared from ~%s. ([original post](%s))", fromChannel.Name, p.makePostLink(team.Name, post.Id)),
 		}
+		newPost.AddProp(SharedPostPropKey, post.Id)
+
 		if newPost, appErr = p.API.CreatePost(newPost); appErr != nil {
 			p.API.LogWarn("failed to create post", "error", appErr.Error())
 		}

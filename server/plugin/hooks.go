@@ -37,10 +37,13 @@ func (p *Plugin) ReactionHasBeenAdded(c *plugin.Context, reaction *model.Reactio
 
 // MessageWillBePosted expand contents of permalink of local post
 func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*model.Post, string) {
+	if _, ok := post.GetProps()[SharedPostPropKey]; !ok {
+		return post, ""
+	}
 	siteURL := p.API.GetConfig().ServiceSettings.SiteURL
 	channel, appErr := p.API.GetChannel(post.ChannelId)
 	if appErr != nil {
-		return post, appErr.Error()
+		return post, ""
 	}
 
 	if channel.Type == model.CHANNEL_DIRECT || channel.Type == model.CHANNEL_GROUP {
@@ -49,13 +52,13 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 
 	team, appErr := p.API.GetTeam(channel.TeamId)
 	if appErr != nil {
-		return post, appErr.Error()
+		return post, ""
 	}
 
 	selfLink := fmt.Sprintf("%s/%s", *siteURL, team.Name)
 	selfLinkPattern, err := regexp.Compile(fmt.Sprintf("%s%s", selfLink, `/[\w/]+`))
 	if err != nil {
-		return post, err.Error()
+		return post, ""
 	}
 
 	matches := selfLinkPattern.FindAllString(post.Message, -1)
@@ -67,25 +70,25 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 		postID := separated[len(separated)-1]
 		oldPost, appErr := p.API.GetPost(postID)
 		if appErr != nil {
-			return post, appErr.Error()
+			return post, ""
 		}
 
 		newFileIds, appErr := p.API.CopyFileInfos(post.UserId, oldPost.FileIds)
 		if appErr != nil {
 			p.API.LogWarn("Failed to copy file ids", "error", appErr.Error())
-			return post, appErr.Error()
+			return post, ""
 		}
 		// NOTES: if attaching over 5 files, error will occur
 		post.FileIds = append(post.FileIds, newFileIds...)
 
 		oldchannel, appErr := p.API.GetChannel(oldPost.ChannelId)
 		if appErr != nil {
-			return post, appErr.Error()
+			return post, ""
 		}
 
 		postUser, appErr := p.API.GetUser(oldPost.UserId)
 		if appErr != nil {
-			return post, appErr.Error()
+			return post, ""
 		}
 		oldPostCreateAt := time.Unix(oldPost.CreateAt/1000, 0)
 
