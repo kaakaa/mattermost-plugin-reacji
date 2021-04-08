@@ -1,6 +1,6 @@
 ## Emoji aliases
 
-Some Mattermost emojis has alises. For example, `:+1:` and `:thumbsup:` indicates same emoji :+1:, and when you attach a reaction with `:thumbsup:` to a post, Mattermost considers its reaction as `:+1:`. So if you add a Reacji with `:thumbsup:`, it will never be fired.
+Some Mattermost emojis has aliases. For example, `:+1:` and `:thumbsup:` indicates same emoji :+1:, and when you attach a reaction with `:thumbsup:` to a post, Mattermost considers its reaction as `:+1:`. So if you add a Reacji with `:thumbsup:`, it will never be fired.
 
 The following table is Mattermost emoji alias list (AFAIK). You should avoid to use emojis in `aliases` row for Reacji, and should use one in `name` row.
 
