@@ -30,7 +30,7 @@ Download plugin from [Releases](https://github.com/kaakaa/mattermost-plugin-reac
 
 ## Notes
 
--   **Reacji with emoji alias will never be fired**. See [details](./note-aliase.md).
+-   **Reacji with emoji alias will never be fired**. See [details](./notes-alias.md).
 -   Couldn't set private channel and DM/GM channel as `to` channel
 
 ## Licence
