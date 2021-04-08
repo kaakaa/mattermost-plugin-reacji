@@ -25,7 +25,7 @@ func main() {
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err.Error)
+		log.Fatal(err.Error())
 	}
 	var e []Emoji
 	if err := json.Unmarshal(b, &e); err != nil {
