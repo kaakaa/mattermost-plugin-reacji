@@ -22,9 +22,18 @@ func (p *Plugin) ReactionHasBeenAdded(c *plugin.Context, reaction *model.Reactio
 		return
 	}
 	channelID := post.ChannelId
+	channel, appErr := p.API.GetChannel(channelID)
+	if appErr != nil {
+		p.API.LogWarn("failed to get channel", "channel_id", channelID)
+		return
+	}
+	teamID := channel.TeamId
 
 	var reacjis []*reacji.Reacji
 	for _, reacji := range p.reacjiList.Reacjis {
+		if reacji.TeamID != teamID {
+			continue
+		}
 		if reacji.FromChannelID == FromAllChannelKeyword || reacji.FromChannelID == channelID {
 			if reacji.EmojiName == emojiName {
 				reacjis = append(reacjis, reacji)

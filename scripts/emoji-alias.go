@@ -10,8 +10,8 @@ import (
 )
 
 type Emoji struct {
-	Aliases  []string `json:"aliases"`
 	Filename string   `json:"filename"`
+	Aliases  []string `json:"aliases"`
 }
 
 func main() {
@@ -25,11 +25,13 @@ func main() {
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
+		return
 	}
 	var e []Emoji
 	if err := json.Unmarshal(b, &e); err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
+		return
 	}
 
 	table := []string{
