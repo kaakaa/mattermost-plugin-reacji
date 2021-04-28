@@ -17,7 +17,9 @@ const (
 	CommandNameReacji = "reacji"
 	botUserName       = "reacji-bot"
 	botDisplayName    = "Reacji Bot"
-	SharedPostPropKey = "reacji-shared"
+
+	SharedPostPropKey     = "reacji-shared"
+	FromAllChannelKeyword = "[ALL-CHANNELS]"
 )
 
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
@@ -84,7 +86,7 @@ func (p *Plugin) OnDeactivate() error {
 	return nil
 }
 
-func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, userID string) {
+func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, fromChannelID, userID string) {
 	for _, r := range reacjis {
 		shared, err := p.Store.Shared().Get(post.Id, r.ToChannelID, r.DeleteKey)
 		if err != nil {
@@ -98,9 +100,9 @@ func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, userID st
 			continue
 		}
 
-		fromChannel, appErr := p.API.GetChannel(r.FromChannelID)
+		fromChannel, appErr := p.API.GetChannel(fromChannelID)
 		if appErr != nil {
-			p.API.LogWarn("failed to get channel", "channel_id", r.FromChannelID, "error", appErr.Error())
+			p.API.LogWarn("failed to get channel", "channel_id", fromChannelID, "error", appErr.Error())
 			continue
 		}
 		team, appErr := p.API.GetTeam(fromChannel.TeamId)
@@ -163,14 +165,9 @@ func (p *Plugin) HasAdminPermission(reacji *reacji.Reacji, issuerID string) (boo
 	return false, nil
 }
 
-func (p *Plugin) HasPermissionToPrivateChannel(from, to *model.Channel, issuerID string) bool {
-	if from.Type != model.CHANNEL_OPEN {
-		if !p.API.HasPermissionToChannel(issuerID, from.Id, model.PERMISSION_READ_CHANNEL) {
-			return false
-		}
-	}
-	if to.Type != model.CHANNEL_OPEN {
-		if !p.API.HasPermissionToChannel(issuerID, to.Id, model.PERMISSION_READ_CHANNEL) {
+func (p *Plugin) HasPermissionToChannel(c *model.Channel, issuerID string) bool {
+	if c.Type != model.CHANNEL_OPEN {
+		if !p.API.HasPermissionToChannel(issuerID, c.Id, model.PERMISSION_READ_CHANNEL) {
 			return false
 		}
 	}
