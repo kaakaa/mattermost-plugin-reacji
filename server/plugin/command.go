@@ -38,41 +38,11 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	p.API.LogDebug("execute reacji command", "subcommand", cmdElements[1])
 	switch cmdElements[1] {
 	case "add":
-		if len(p.reacjiList.Reacjis) >= p.getConfiguration().MaxReacjis {
-			return &model.CommandResponse{Text: "Failed to add reacjis because the number of reacjis reaches maximum. Remove unnecessary reacjis or change the value of MaxReacjis from plugin setting in system console, and try again."}, nil
-		}
 		emojiNames := p.findEmojis(cmdElements[2:])
-		var toChannelIds []string
-		for _, id := range args.ChannelMentions {
-			toChannelIds = append(toChannelIds, id)
-		}
-		if len(emojiNames) == 0 {
-			return &model.CommandResponse{Text: "Must specify at least one emoji"}, nil
-		}
-		if err := p.storeReacjis(userID, args.TeamId, FromAllChannelKeyword, emojiNames, toChannelIds); err != nil {
-			return &model.CommandResponse{
-				Text: fmt.Sprintf("failed to store reacjis. error=%s", err.Error()),
-			}, nil
-		}
-		return &model.CommandResponse{Text: "add reacjis successfully"}, nil
+		return p.addReacji(emojiNames, userID, args.TeamId, FromAllChannelKeyword, args.ChannelMentions)
 	case "add-from-here":
-		if len(p.reacjiList.Reacjis) >= p.getConfiguration().MaxReacjis {
-			return &model.CommandResponse{Text: "Failed to add reacjis because the number of reacjis reaches maximum. Remove unnecessary reacjis or change the value of MaxReacjis from plugin setting in system console, and try again."}, nil
-		}
 		emojiNames := p.findEmojis(cmdElements[2:])
-		var toChannelIds []string
-		for _, id := range args.ChannelMentions {
-			toChannelIds = append(toChannelIds, id)
-		}
-		if len(emojiNames) == 0 || len(toChannelIds) == 0 {
-			return &model.CommandResponse{Text: "Must specify at least one emoji and one channel"}, nil
-		}
-		if err := p.storeReacjis(userID, args.TeamId, FromChannelID, emojiNames, toChannelIds); err != nil {
-			return &model.CommandResponse{
-				Text: fmt.Sprintf("failed to store reacjis. error=%s", err.Error()),
-			}, nil
-		}
-		return &model.CommandResponse{Text: "add reacjis successfully"}, nil
+		return p.addReacji(emojiNames, userID, args.TeamId, FromChannelID, args.ChannelMentions)
 	case "remove":
 		if len(cmdElements) == 2 {
 			return &model.CommandResponse{Text: "No delete key"}, nil
@@ -95,6 +65,25 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	default:
 		return &model.CommandResponse{Text: fmt.Sprintf("invalid subcommand: %s", cmdElements[1])}, nil
 	}
+}
+
+func (p *Plugin) addReacji(emojiNames []string, userID, teamID, fromChannelID string, channelMentions model.ChannelMentionMap) (*model.CommandResponse, *model.AppError) {
+	if len(p.reacjiList.Reacjis) >= p.getConfiguration().MaxReacjis {
+		return &model.CommandResponse{Text: "Failed to add reacjis because the number of reacjis reaches maximum. Remove unnecessary reacjis or change the value of MaxReacjis from plugin setting in system console, and try again."}, nil
+	}
+	var toChannelIds []string
+	for _, id := range channelMentions {
+		toChannelIds = append(toChannelIds, id)
+	}
+	if len(emojiNames) == 0 || len(toChannelIds) == 0 {
+		return &model.CommandResponse{Text: "Must specify at least one emoji and at least one channel"}, nil
+	}
+	if err := p.storeReacjis(userID, teamID, fromChannelID, emojiNames, toChannelIds); err != nil {
+		return &model.CommandResponse{
+			Text: fmt.Sprintf("failed to store reacjis. error=%s", err.Error()),
+		}, nil
+	}
+	return &model.CommandResponse{Text: "add reacjis successfully"}, nil
 }
 
 func (p *Plugin) findEmojis(args []string) []string {
