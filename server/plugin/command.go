@@ -399,8 +399,9 @@ func (p *Plugin) refreshCaches(userID string) (*model.CommandResponse, *model.Ap
 }
 
 const commandHelpMessage = `Manage Reacjis commands
-* **/reacji add :EMOJI: ~CHANNEL**:Register new reacji. If you attach EMOJI to the post, the post will share to CHANNEL.
-* **/reacji list [-all]**:List reacjis that is registered in channel. With **--all** list all registered reacjis in this server.
+* **/reacji add :EMOJI: ~CHANNEL**: Register new reacji. If you attach EMOJI to the post in any channels except for DM/GM, the post will share to CHANNEL.
+* **/reacji add-from-here :EMOJI: ~CHANNEL**: Register new reacji. If you attach EMOJI to the post in the channel where this command is executed, the post will share to CHANNEL.
+* **/reacji list [-all]**: List reacjis that is registered in channel. With **--all** list all registered reacjis in this server.
 * **/reacji remove [Deletekey...]**: [CREATOR or SYSTEM_ADMIN only] Remove reacjis by DeleteKey.
 * **/reacji remove-all**: [SYSTEM_ADMIN onlye] Remove all existing reacjis.
 * **/reacji refresh-caches**: [SYSTEM_ADMIN only] Delete all caches.
@@ -415,7 +416,8 @@ func (p *Plugin) help() (*model.CommandResponse, *model.AppError) {
 
 func createAutoCompleteData() *model.AutocompleteData {
 	suggestions := model.NewAutocompleteData("reacji", "[command]", "Available commands: add, list, remove, remove-all, help")
-	suggestions.AddCommand(model.NewAutocompleteData("add", ":EMOJI: ~CHANNEL", "Register new reacji. If you attach EMOJI to the post, the post will share to CHANNEL."))
+	suggestions.AddCommand(model.NewAutocompleteData("add", ":EMOJI: ~CHANNEL", "Register new reacji. If you attach EMOJI to the post in any channels except for DM/GM, the post will share to CHANNEL."))
+	suggestions.AddCommand(model.NewAutocompleteData("add-from-here", ":EMOJI: ~CHANNEL", "Register new reacji. If you attach EMOJI to the post in the channel where this command is executed, the post will share to CHANNEL."))
 	suggestions.AddCommand(model.NewAutocompleteData("list", "[--all]", "List reacjis in this channel. With `--all` list all registered reacjis in this server."))
 	suggestions.AddCommand(model.NewAutocompleteData("remove", "[DeleteKey...]", "[CREATOR or SYSTEM_ADMIN only] Remove reacji by DeleteKey. You can see `DeleteKey` by `/reacji list`"))
 	suggestions.AddCommand(model.NewAutocompleteData("remove-all", "", "[SYSTEM_ADMIN only] Remove all reacjis in this server."))
