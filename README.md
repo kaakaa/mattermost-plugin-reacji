@@ -13,9 +13,27 @@ Download plugin from [Releases](https://github.com/kaakaa/mattermost-plugin-reac
 
 ## Usage
 
-1. Add reacji to channels (e.g. execute `/reacji add :+1: ~off-topic` in `town-square`)
+### Add reacji
+
+1. Add reacji to channels (e.g. execute `/reacji add :+1: ~off-topic`)
+2. React to any posts in any public channels in the team with `:+1:`
+3. Plugin will share the post attached `:+1:` to `~off-topic`
+
+### Add reacji with channel restriction
+
+1. Add reacji to channels (e.g. execute `/reacji add-from-here :+1: ~off-topic` in `town-square`)
+    - Share only posts in the channel where `/reacji add-from-here` was executed
 2. React to any posts in `town-square` with `:+1:`
 3. Plugin will share the post attached `:+1:` to `~off-topic`
+4. React to any posts in channels except for `town-square` never fire sharing
+
+### Allow to share posts in private channel
+
+1. Invite `Reacji Bot` to the team from **Main Menu > Invite People**
+   ![invite reacji-bot](./sc-invite-reacjibot.png)
+2. Invite `Reacji Bot` to the private channel where you want to share posts by reacji
+3. Add reacji to channels (e.g. execute `/reacji add :+1: ~off-topic`)
+4. React to any posts in the private channel where `Reacji Bot` is member
 
 ### Commands
 
@@ -32,6 +50,7 @@ Download plugin from [Releases](https://github.com/kaakaa/mattermost-plugin-reac
 
 -   **Reacji with emoji alias will never be fired**. See [details](./notes-alias.md).
 -   Couldn't set private channel and DM/GM channel as `to` channel
+-   Never fire any reacjis for posts in DM/GM channel even if FromChannel is `[ALL-CHANNELS]`
 
 ## Licence
 
