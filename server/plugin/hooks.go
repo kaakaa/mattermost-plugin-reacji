@@ -34,14 +34,14 @@ func (p *Plugin) ReactionHasBeenAdded(c *plugin.Context, reaction *model.Reactio
 		if reacji.TeamID != teamID {
 			continue
 		}
-		if reacji.FromChannelID == channelID {
+		if reacji.FromChannelID == FromAllChannelKeyword || reacji.FromChannelID == channelID {
 			if reacji.EmojiName == emojiName {
 				reacjis = append(reacjis, reacji)
 			}
 		}
 	}
 
-	p.sharePost(reacjis, post, reaction.UserId)
+	go p.sharePost(reacjis, post, channelID, reaction.UserId)
 }
 
 // MessageWillBePosted expand contents of permalink of local post

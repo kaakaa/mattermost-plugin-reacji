@@ -227,24 +227,6 @@ func TestPluginExecuteCommend(t *testing.T) {
 				Text: "Must specify at least one emoji and at least one channel",
 			},
 		},
-		"error, add, no channels": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
-				return api
-			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
-			Args: &model.CommandArgs{
-				UserId:          testutils.GetUserID(),
-				ChannelId:       testutils.GetChannelID(),
-				Command:         "/reacji add :+1:",
-				ChannelMentions: model.ChannelMentionMap{},
-			},
-			ShouldError: false,
-			ExpectedResponse: &model.CommandResponse{
-				Text: "Must specify at least one emoji and at least one channel",
-			},
-		},
 		"error, add, updating store fails": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
@@ -266,6 +248,45 @@ func TestPluginExecuteCommend(t *testing.T) {
 			ShouldError: false,
 			ExpectedResponse: &model.CommandResponse{
 				Text: "failed to store reacjis. error=",
+			},
+		},
+		"fine, add-from-here with system emoji": {
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
+				return api
+			},
+			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
+			SetupStore: func(s *mockstore.Store) *mockstore.Store {
+				s.ReacjiStore.On("Update", mock.AnythingOfType("*reacji.List"), mock.AnythingOfType("*reacji.List")).Return(nil)
+				return s
+			},
+			Args: &model.CommandArgs{
+				UserId:          testutils.GetUserID(),
+				ChannelId:       testutils.GetChannelID(),
+				Command:         "/reacji add-from-here :+1: ~channel",
+				ChannelMentions: model.ChannelMentionMap{"channel": testutils.GetChannelID2()},
+			},
+			ShouldError: false,
+			ExpectedResponse: &model.CommandResponse{
+				Text: "add reacjis successfully",
+			},
+		},
+		"error, add-from-here, no channels": {
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
+				return api
+			},
+			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
+			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
+			Args: &model.CommandArgs{
+				UserId:          testutils.GetUserID(),
+				ChannelId:       testutils.GetChannelID(),
+				Command:         "/reacji add-from-here :+1:",
+				ChannelMentions: model.ChannelMentionMap{},
+			},
+			ShouldError: false,
+			ExpectedResponse: &model.CommandResponse{
+				Text: "Must specify at least one emoji and at least one channel",
 			},
 		},
 		"fine, remove": {
