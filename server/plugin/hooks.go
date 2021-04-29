@@ -27,6 +27,12 @@ func (p *Plugin) ReactionHasBeenAdded(c *plugin.Context, reaction *model.Reactio
 		p.API.LogWarn("failed to get channel", "channel_id", channelID)
 		return
 	}
+	// Don't share the post if reacji-bot doesn't have read permission for channel
+	if !p.HasPermissionToChannel(channel, p.botUserID) {
+		p.API.LogDebug("stop sharing because reaji-bot doesn't have read permission")
+		return
+	}
+
 	teamID := channel.TeamId
 
 	var reacjis []*reacji.Reacji
