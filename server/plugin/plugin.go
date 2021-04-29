@@ -18,7 +18,9 @@ const (
 	botUserName       = "reacji-bot"
 	botDisplayName    = "Reacji Bot"
 
-	SharedPostPropKey     = "reacji-shared"
+	// PostProps key for storing original post ID.
+	SharedPostPropKey = "reacji-shared"
+	// will be storead as Reacji.FromChannelId instead of the real channel ID.
 	FromAllChannelKeyword = "[ALL-CHANNELS]"
 )
 
