@@ -172,3 +172,54 @@ func TestPluginOnDeactivate(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+func TestPluginHasPermissionToChannel(t *testing.T) {
+	userID := testutils.GetUserID()
+	channelID := testutils.GetChannelID()
+
+	for name, test := range map[string]struct {
+		SetupAPI func(*plugintest.API) *plugintest.API
+		Channel  *model.Channel
+		UserID   string
+		Expected bool
+	}{
+		"fine, public channel": {
+			SetupAPI: func(api *plugintest.API) *plugintest.API { return api },
+			Channel:  &model.Channel{Id: channelID, Type: model.CHANNEL_OPEN},
+			UserID:   userID,
+			Expected: true,
+		},
+		"fine, private channel with permission": {
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("HasPermissionToChannel", userID, channelID, model.PERMISSION_READ_CHANNEL).Return(true)
+				return api
+			},
+			Channel:  &model.Channel{Id: channelID, Type: model.CHANNEL_PRIVATE},
+			UserID:   userID,
+			Expected: true,
+		},
+		"fine, private channel without permission": {
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("HasPermissionToChannel", userID, channelID, model.PERMISSION_READ_CHANNEL).Return(false)
+				return api
+			},
+			Channel:  &model.Channel{Id: channelID, Type: model.CHANNEL_PRIVATE},
+			UserID:   userID,
+			Expected: false,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			a := test.SetupAPI(&plugintest.API{})
+			defer a.AssertExpectations(t)
+			h := &plugintest.Helpers{}
+			defer h.AssertExpectations(t)
+			s := &mockstore.Store{}
+			defer s.AssertExpectations(t)
+
+			p := setupTestPlugin(a, h, s)
+			actual := p.HasPermissionToChannel(test.Channel, test.UserID)
+
+			assert.Equal(t, test.Expected, actual)
+		})
+	}
+}
