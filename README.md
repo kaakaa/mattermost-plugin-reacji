@@ -11,6 +11,14 @@ Mattermost Reacji plugin inspired by [Slack's Reacji Channeler](https://reacji-c
 Download plugin from [Releases](https://github.com/kaakaa/mattermost-plugin-reacji/releases/latest) and Install plugin in **System Console > Plugin > Plugin Management**  
 [Plugins \(Beta\)](https://docs.mattermost.com/administration/plugins.html#set-up-guide)
 
+### Settings
+
+Change settings for this plugin in **System Console > Plugins(Beta) > Reacji Channeler**.
+
+-   **Allow duplicate sharing**: Setting to determine if posts that have already been shared should be shared again each time a reaction is attached.
+-   **Days to keep shared record**: After the number of days for this setting has passed, posts that have been shared once will be share again even if **Allow duplicate shareing** is `false`.
+-   **Max Reacjis**: Maximum number of reacjis per Mattermost instance (not per team).
+
 ## Usage
 
 ### Add reacji
