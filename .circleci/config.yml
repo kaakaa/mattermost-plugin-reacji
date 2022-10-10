@@ -1,17 +1,29 @@
 version: 2.1
 
 orbs:
-  plugin-ci: mattermost/plugin-ci@0.1.0
+  plugin-ci: mattermost/plugin-ci@0.1.12
 
 workflows:
   version: 2
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * 2"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - plugin-ci/lint
+      - plugin-ci/test
+      - plugin-ci/build
   ci:
     jobs:
       - plugin-ci/lint:
           filters:
             tags:
               only: /^v.*/
-      - plugin-ci/coverage:
+      - plugin-ci/test:
           filters:
             tags:
               only: /^v.*/
@@ -19,11 +31,9 @@ workflows:
           filters:
             tags:
               only: /^v.*/
-            branches:
-              ignore: /.*/
+      - plugin-ci/coverage:
           requires:
-            - plugin-ci/lint
-            - plugin-ci/coverage
+            - plugin-ci/test
       - plugin-ci/deploy-release-github:
           filters:
             tags:
@@ -31,4 +41,6 @@ workflows:
             branches:
               ignore: /.*/
           requires:
+            - plugin-ci/lint
+            - plugin-ci/test
             - plugin-ci/build
