@@ -8,9 +8,9 @@ import (
 	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/store/mockstore"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/utils/testutils"
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -20,12 +20,10 @@ func TestPluginExecuteCommend(t *testing.T) {
 		a := &plugintest.API{}
 		a.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
 		defer a.AssertExpectations(t)
-		h := &plugintest.Helpers{}
-		defer h.AssertExpectations(t)
 		s := &mockstore.Store{}
 		defer s.AssertExpectations(t)
 
-		p := setupTestPlugin(a, h, s)
+		p := setupTestPlugin(a, s)
 		for i := 0; i < p.getConfiguration().MaxReacjis+1; i++ {
 			p.reacjiList.Reacjis = append(p.reacjiList.Reacjis, &reacji.Reacji{})
 		}
@@ -46,7 +44,6 @@ func TestPluginExecuteCommend(t *testing.T) {
 
 	for name, test := range map[string]struct { // nolint: govet
 		SetupAPI         func(*plugintest.API) *plugintest.API
-		SetupHelpers     func(*plugintest.Helpers) *plugintest.Helpers
 		SetupStore       func(*mockstore.Store) *mockstore.Store
 		Args             *model.CommandArgs
 		ShouldError      bool
@@ -57,8 +54,7 @@ func TestPluginExecuteCommend(t *testing.T) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
+			SetupStore: func(s *mockstore.Store) *mockstore.Store { return s },
 			Args: &model.CommandArgs{
 				UserId:    testutils.GetUserID(),
 				ChannelId: testutils.GetChannelID(),
@@ -70,9 +66,8 @@ func TestPluginExecuteCommend(t *testing.T) {
 			},
 		},
 		"fine, no args": {
-			SetupAPI:     func(api *plugintest.API) *plugintest.API { return api },
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
+			SetupAPI:   func(api *plugintest.API) *plugintest.API { return api },
+			SetupStore: func(s *mockstore.Store) *mockstore.Store { return s },
 			Args: &model.CommandArgs{
 				UserId:    testutils.GetUserID(),
 				ChannelId: testutils.GetChannelID(),
@@ -84,9 +79,8 @@ func TestPluginExecuteCommend(t *testing.T) {
 			},
 		},
 		"fine, no args with a space": {
-			SetupAPI:     func(api *plugintest.API) *plugintest.API { return api },
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
+			SetupAPI:   func(api *plugintest.API) *plugintest.API { return api },
+			SetupStore: func(s *mockstore.Store) *mockstore.Store { return s },
 			Args: &model.CommandArgs{
 				UserId:    testutils.GetUserID(),
 				ChannelId: testutils.GetChannelID(),
@@ -102,8 +96,7 @@ func TestPluginExecuteCommend(t *testing.T) {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
+			SetupStore: func(s *mockstore.Store) *mockstore.Store { return s },
 			Args: &model.CommandArgs{
 				UserId:    testutils.GetUserID(),
 				ChannelId: testutils.GetChannelID(),
@@ -119,7 +112,6 @@ func TestPluginExecuteCommend(t *testing.T) {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.ReacjiStore.On("Update", mock.AnythingOfType("*reacji.List"), mock.AnythingOfType("*reacji.List")).Return(nil)
 				return s
@@ -141,7 +133,6 @@ func TestPluginExecuteCommend(t *testing.T) {
 				api.On("GetEmojiByName", customEmojiName).Return(nil, nil)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.ReacjiStore.On("Update", mock.AnythingOfType("*reacji.List"), mock.AnythingOfType("*reacji.List")).Return(nil)
 				return s
@@ -163,7 +154,6 @@ func TestPluginExecuteCommend(t *testing.T) {
 				api.On("GetEmojiByName", customEmojiName).Return(nil, nil)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.ReacjiStore.On("Update", mock.AnythingOfType("*reacji.List"), mock.AnythingOfType("*reacji.List")).Return(nil)
 				return s
@@ -188,7 +178,6 @@ func TestPluginExecuteCommend(t *testing.T) {
 				api.On("GetEmojiByName", customEmojiName).Return(nil, nil)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.ReacjiStore.On("Update", mock.AnythingOfType("*reacji.List"), mock.AnythingOfType("*reacji.List")).Return(nil)
 				return s
@@ -212,8 +201,7 @@ func TestPluginExecuteCommend(t *testing.T) {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
+			SetupStore: func(s *mockstore.Store) *mockstore.Store { return s },
 			Args: &model.CommandArgs{
 				UserId:    testutils.GetUserID(),
 				ChannelId: testutils.GetChannelID(),
@@ -232,7 +220,6 @@ func TestPluginExecuteCommend(t *testing.T) {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.ReacjiStore.On("Update", mock.AnythingOfType("*reacji.List"), mock.AnythingOfType("*reacji.List")).Return(errors.New(""))
 				return s
@@ -255,7 +242,6 @@ func TestPluginExecuteCommend(t *testing.T) {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.ReacjiStore.On("Update", mock.AnythingOfType("*reacji.List"), mock.AnythingOfType("*reacji.List")).Return(nil)
 				return s
@@ -276,8 +262,7 @@ func TestPluginExecuteCommend(t *testing.T) {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
+			SetupStore: func(s *mockstore.Store) *mockstore.Store { return s },
 			Args: &model.CommandArgs{
 				UserId:          testutils.GetUserID(),
 				ChannelId:       testutils.GetChannelID(),
@@ -294,7 +279,6 @@ func TestPluginExecuteCommend(t *testing.T) {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.ReacjiStore.On("Update", mock.AnythingOfType("*reacji.List"), mock.AnythingOfType("*reacji.List")).Return(nil)
 				return s
@@ -315,8 +299,7 @@ func TestPluginExecuteCommend(t *testing.T) {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
+			SetupStore: func(s *mockstore.Store) *mockstore.Store { return s },
 			Args: &model.CommandArgs{
 				UserId:          testutils.GetUserID(),
 				ChannelId:       testutils.GetChannelID(),
@@ -331,10 +314,9 @@ func TestPluginExecuteCommend(t *testing.T) {
 		"fine, remove-all": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
-				api.On("GetUser", testutils.GetUserID()).Return(&model.User{Roles: model.SYSTEM_ADMIN_ROLE_ID}, nil)
+				api.On("GetUser", testutils.GetUserID()).Return(&model.User{Roles: model.SystemAdminRoleId}, nil)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.ReacjiStore.On("Update", mock.AnythingOfType("*reacji.List"), mock.AnythingOfType("*reacji.List")).Return(nil)
 				return s
@@ -353,10 +335,9 @@ func TestPluginExecuteCommend(t *testing.T) {
 		"fine, remove-all --force": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...)
-				api.On("GetUser", testutils.GetUserID()).Return(&model.User{Roles: model.SYSTEM_ADMIN_ROLE_ID}, nil)
+				api.On("GetUser", testutils.GetUserID()).Return(&model.User{Roles: model.SystemAdminRoleId}, nil)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.ReacjiStore.On("ForceUpdate", mock.AnythingOfType("*reacji.List")).Return(nil)
 				return s
@@ -376,12 +357,10 @@ func TestPluginExecuteCommend(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			a := test.SetupAPI(&plugintest.API{})
 			defer a.AssertExpectations(t)
-			h := test.SetupHelpers(&plugintest.Helpers{})
-			defer h.AssertExpectations(t)
 			s := test.SetupStore(&mockstore.Store{})
 			defer s.AssertExpectations(t)
 
-			p := setupTestPlugin(a, h, s)
+			p := setupTestPlugin(a, s)
 			resp, appErr := p.ExecuteCommand(&plugin.Context{}, test.Args)
 
 			if test.ShouldError {
@@ -401,38 +380,34 @@ func TestPluginFindEmojis(t *testing.T) {
 	var init []string
 
 	for name, test := range map[string]struct {
-		SetupAPI     func(*plugintest.API) *plugintest.API
-		SetupHelpers func(*plugintest.Helpers) *plugintest.Helpers
-		SetupStore   func(*mockstore.Store) *mockstore.Store
-		Args         []string
-		Expected     []string
+		SetupAPI   func(*plugintest.API) *plugintest.API
+		SetupStore func(*mockstore.Store) *mockstore.Store
+		Args       []string
+		Expected   []string
 	}{
 		"find, system emoji": {
-			SetupAPI:     func(api *plugintest.API) *plugintest.API { return api },
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
-			Args:         []string{":+1:"},
-			Expected:     []string{"+1"},
+			SetupAPI:   func(api *plugintest.API) *plugintest.API { return api },
+			SetupStore: func(s *mockstore.Store) *mockstore.Store { return s },
+			Args:       []string{":+1:"},
+			Expected:   []string{"+1"},
 		},
 		"fine, custom emoji": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("GetEmojiByName", customEmojiName).Return(nil, nil)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
-			Args:         []string{fmt.Sprintf(":%s:", customEmojiName)},
-			Expected:     []string{customEmojiName},
+			SetupStore: func(s *mockstore.Store) *mockstore.Store { return s },
+			Args:       []string{fmt.Sprintf(":%s:", customEmojiName)},
+			Expected:   []string{customEmojiName},
 		},
 		"error, GetEmojiByName fails": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("GetEmojiByName", customEmojiName).Return(nil, &model.AppError{})
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
-			Args:         []string{fmt.Sprintf(":%s:", customEmojiName)},
-			Expected:     init,
+			SetupStore: func(s *mockstore.Store) *mockstore.Store { return s },
+			Args:       []string{fmt.Sprintf(":%s:", customEmojiName)},
+			Expected:   init,
 		},
 		"error, GetEmojiByName fails in second times": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
@@ -440,21 +415,18 @@ func TestPluginFindEmojis(t *testing.T) {
 				api.On("GetEmojiByName", customEmojiName2).Return(nil, &model.AppError{})
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
-			Args:         []string{fmt.Sprintf(":%s:", customEmojiName), fmt.Sprintf(":%s:", customEmojiName2)},
-			Expected:     []string{customEmojiName},
+			SetupStore: func(s *mockstore.Store) *mockstore.Store { return s },
+			Args:       []string{fmt.Sprintf(":%s:", customEmojiName), fmt.Sprintf(":%s:", customEmojiName2)},
+			Expected:   []string{customEmojiName},
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			a := test.SetupAPI(&plugintest.API{})
 			defer a.AssertExpectations(t)
-			h := test.SetupHelpers(&plugintest.Helpers{})
-			defer h.AssertExpectations(t)
 			s := test.SetupStore(&mockstore.Store{})
 			defer s.AssertExpectations(t)
 
-			p := setupTestPlugin(a, h, s)
+			p := setupTestPlugin(a, s)
 
 			out := p.findEmojis(test.Args)
 
@@ -466,7 +438,6 @@ func TestPluginFindEmojis(t *testing.T) {
 func TestPluginRefreshCaches(t *testing.T) {
 	for name, test := range map[string]struct { // nolint: govet
 		SetupAPI         func(*plugintest.API) *plugintest.API
-		SetupHelpers     func(*plugintest.Helpers) *plugintest.Helpers
 		SetupStore       func(*mockstore.Store) *mockstore.Store
 		UserID           string
 		ShouldError      bool
@@ -474,10 +445,9 @@ func TestPluginRefreshCaches(t *testing.T) {
 	}{
 		"fine": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("GetUser", testutils.GetUserID()).Return(&model.User{Roles: model.SYSTEM_ADMIN_ROLE_ID}, nil)
+				api.On("GetUser", testutils.GetUserID()).Return(&model.User{Roles: model.SystemAdminRoleId}, nil)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.SharedStore.On("DeleteAll").Return(1, nil)
 				return s
@@ -490,17 +460,15 @@ func TestPluginRefreshCaches(t *testing.T) {
 				api.On("GetUser", testutils.GetUserID()).Return(nil, &model.AppError{})
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
-			SetupStore:   func(s *mockstore.Store) *mockstore.Store { return s },
-			UserID:       testutils.GetUserID(),
-			ShouldError:  true,
+			SetupStore:  func(s *mockstore.Store) *mockstore.Store { return s },
+			UserID:      testutils.GetUserID(),
+			ShouldError: true,
 		},
 		"error, updating store fails": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("GetUser", testutils.GetUserID()).Return(&model.User{Roles: model.SYSTEM_ADMIN_ROLE_ID}, nil)
+				api.On("GetUser", testutils.GetUserID()).Return(&model.User{Roles: model.SystemAdminRoleId}, nil)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers { return helpers },
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.SharedStore.On("DeleteAll").Return(0, errors.New(""))
 				return s
@@ -512,12 +480,10 @@ func TestPluginRefreshCaches(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			a := test.SetupAPI(&plugintest.API{})
 			defer a.AssertExpectations(t)
-			h := test.SetupHelpers(&plugintest.Helpers{})
-			defer h.AssertExpectations(t)
 			s := test.SetupStore(&mockstore.Store{})
 			defer s.AssertExpectations(t)
 
-			p := setupTestPlugin(a, h, s)
+			p := setupTestPlugin(a, s)
 
 			out, appErr := p.refreshCaches(test.UserID)
 

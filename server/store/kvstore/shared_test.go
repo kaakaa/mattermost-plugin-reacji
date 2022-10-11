@@ -5,8 +5,8 @@ import (
 
 	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/utils/testutils"
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -24,11 +24,9 @@ func TestSharedStoreGet(t *testing.T) {
 		shared := &reacji.SharedPost{}
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
 		api.On("KVGet", key).Return(shared.EncodeToByte(), nil)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		out, err := store.Shared().Get(postID, toChannelID, deleteKey)
 		assert.NoError(t, err)
@@ -43,11 +41,9 @@ func TestSharedStoreGet(t *testing.T) {
 		require.NoError(t, err)
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
 		api.On("KVGet", key).Return(nil, nil)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		out, err := store.Shared().Get(postID, toChannelID, deleteKey)
 		assert.NoError(t, err)
@@ -63,11 +59,9 @@ func TestSharedStoreGet(t *testing.T) {
 		require.NoError(t, err)
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
 		api.On("KVGet", key).Return(nil, appErr)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		out, err := store.Shared().Get(postID, toChannelID, deleteKey)
 		assert.Error(t, err)
@@ -83,11 +77,9 @@ func TestSharedStoreGet(t *testing.T) {
 		require.NoError(t, err)
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
 		api.On("KVGet", key).Return([]byte{}, appErr)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		out, err := store.Shared().Get(postID, toChannelID, deleteKey)
 		assert.Error(t, err)
@@ -112,11 +104,9 @@ func TestSharedStoreSet(t *testing.T) {
 		}
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
 		api.On("KVSetWithOptions", key, shared.EncodeToByte(), opt).Return(true, nil)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		err = store.Shared().Set(shared, days)
 		assert.NoError(t, err)
@@ -139,11 +129,9 @@ func TestSharedStoreSet(t *testing.T) {
 		appErr := &model.AppError{}
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
 		api.On("KVSetWithOptions", key, shared.EncodeToByte(), opt).Return(false, appErr)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		err = store.Shared().Set(shared, days)
 		assert.Error(t, err)
@@ -164,11 +152,9 @@ func TestSharedStoreSet(t *testing.T) {
 		}
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
 		api.On("KVSetWithOptions", key, shared.EncodeToByte(), opt).Return(false, nil)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		err = store.Shared().Set(shared, days)
 		assert.Error(t, err)
@@ -180,11 +166,9 @@ func TestSharedStoreDeleteAll(t *testing.T) {
 		keys := []string{}
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
-		helpers.On("KVListWithOptions", mock.AnythingOfType("plugin.KVListOption")).Return(keys, nil)
+		api.On("KVList", mock.AnythingOfType("int"), mock.AnythingOfType("int")).Return(keys, nil)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		i, err := store.Shared().DeleteAll()
 		assert.NoError(t, err)
@@ -194,12 +178,10 @@ func TestSharedStoreDeleteAll(t *testing.T) {
 		keys := []string{"shared-1"}
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
+		api.On("KVList", mock.AnythingOfType("int"), mock.AnythingOfType("int")).Return(keys, nil)
 		api.On("KVDelete", keys[0]).Return(nil)
-		helpers.On("KVListWithOptions", mock.AnythingOfType("plugin.KVListOption")).Return(keys, nil)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		i, err := store.Shared().DeleteAll()
 		assert.NoError(t, err)
@@ -209,13 +191,11 @@ func TestSharedStoreDeleteAll(t *testing.T) {
 		keys := []string{"shared-1", "shared-2"}
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
+		api.On("KVList", mock.AnythingOfType("int"), mock.AnythingOfType("int")).Return(keys, nil)
 		api.On("KVDelete", keys[0]).Return(nil)
 		api.On("KVDelete", keys[1]).Return(nil)
-		helpers.On("KVListWithOptions", mock.AnythingOfType("plugin.KVListOption")).Return(keys, nil)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		i, err := store.Shared().DeleteAll()
 		assert.NoError(t, err)
@@ -226,11 +206,9 @@ func TestSharedStoreDeleteAll(t *testing.T) {
 		appErr := &model.AppError{}
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
-		helpers.On("KVListWithOptions", mock.AnythingOfType("plugin.KVListOption")).Return(keys, appErr)
+		api.On("KVList", mock.AnythingOfType("int"), mock.AnythingOfType("int")).Return(keys, appErr)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		i, err := store.Shared().DeleteAll()
 		assert.Error(t, err)
@@ -241,12 +219,10 @@ func TestSharedStoreDeleteAll(t *testing.T) {
 		appErr := &model.AppError{}
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
+		api.On("KVList", mock.AnythingOfType("int"), mock.AnythingOfType("int")).Return(keys, nil)
 		api.On("KVDelete", keys[0]).Return(appErr)
-		helpers.On("KVListWithOptions", mock.AnythingOfType("plugin.KVListOption")).Return(keys, nil)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		i, err := store.Shared().DeleteAll()
 		assert.Error(t, err)
@@ -257,13 +233,11 @@ func TestSharedStoreDeleteAll(t *testing.T) {
 		appErr := &model.AppError{}
 
 		api := &plugintest.API{}
-		helpers := &plugintest.Helpers{}
+		api.On("KVList", mock.AnythingOfType("int"), mock.AnythingOfType("int")).Return(keys, nil)
 		api.On("KVDelete", keys[0]).Return(nil)
 		api.On("KVDelete", keys[1]).Return(appErr)
-		helpers.On("KVListWithOptions", mock.AnythingOfType("plugin.KVListOption")).Return(keys, nil)
 		defer api.AssertExpectations(t)
-		defer helpers.AssertExpectations(t)
-		store := setupTestStore(api, helpers)
+		store := setupTestStore(api)
 
 		i, err := store.Shared().DeleteAll()
 		assert.Error(t, err)
