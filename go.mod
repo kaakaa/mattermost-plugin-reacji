@@ -8,4 +8,5 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.1
 	github.com/undefinedlabs/go-mpatch v1.0.6
+	golang.org/x/sys v0.0.0-20221013171732-95e765b1cc43 // indirect
 )
