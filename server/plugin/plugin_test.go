@@ -2,22 +2,25 @@ package plugin
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 
-	"bou.ke/monkey"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/store/kvstore"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/store/mockstore"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/utils/testutils"
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
+	pluginapi "github.com/mattermost/mattermost-plugin-api"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"github.com/undefinedlabs/go-mpatch"
 )
 
-func setupTestPlugin(api *plugintest.API, helpers *plugintest.Helpers, store *mockstore.Store) *Plugin {
+func setupTestPlugin(api *plugintest.API, store *mockstore.Store) *Plugin {
 	p := &Plugin{
 		ServerConfig: testutils.GetServerConfig(),
 	}
@@ -28,7 +31,6 @@ func setupTestPlugin(api *plugintest.API, helpers *plugintest.Helpers, store *mo
 	})
 
 	p.SetAPI(api)
-	p.SetHelpers(helpers)
 	p.botUserID = testutils.GetBotUserID()
 	p.reacjiList = &reacji.List{Reacjis: []*reacji.Reacji{getTestReacji()}}
 	p.Store = store
@@ -50,10 +52,10 @@ func getTestReacji() *reacji.Reacji {
 
 func TestPluginOnActivate(t *testing.T) {
 	for name, test := range map[string]struct {
-		SetupAPI     func(*plugintest.API) *plugintest.API
-		SetupHelpers func(*plugintest.Helpers) *plugintest.Helpers
-		SetupStore   func(*mockstore.Store) *mockstore.Store
-		ShouldError  bool
+		SetupAPI       func(*plugintest.API) *plugintest.API
+		SetupPluginAPI func(*pluginapi.Client) (*pluginapi.Client, []*mpatch.Patch)
+		SetupStore     func(*mockstore.Store) *mockstore.Store
+		ShouldError    bool
 	}{
 		"fine": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
@@ -62,9 +64,12 @@ func TestPluginOnActivate(t *testing.T) {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...).Return(nil)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers {
-				helpers.On("EnsureBot", mock.AnythingOfType("*model.Bot"), mock.AnythingOfType("plugin.EnsureBotOption")).Return(testutils.GetBotUserID(), nil)
-				return helpers
+			SetupPluginAPI: func(client *pluginapi.Client) (*pluginapi.Client, []*mpatch.Patch) {
+				p, err := mpatch.PatchInstanceMethodByName(reflect.TypeOf(client.Bot), "EnsureBot", func(*pluginapi.BotService, *model.Bot, ...pluginapi.EnsureBotOption) (string, error) {
+					return testutils.GetBotUserID(), nil
+				})
+				require.NoError(t, err)
+				return client, []*mpatch.Patch{p}
 			},
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.ReacjiStore.On("Get").Return(&reacji.List{}, nil)
@@ -77,9 +82,12 @@ func TestPluginOnActivate(t *testing.T) {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 1)...).Return(nil)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers {
-				helpers.On("EnsureBot", mock.AnythingOfType("*model.Bot"), mock.AnythingOfType("plugin.EnsureBotOption")).Return("", &model.AppError{})
-				return helpers
+			SetupPluginAPI: func(client *pluginapi.Client) (*pluginapi.Client, []*mpatch.Patch) {
+				p, err := mpatch.PatchInstanceMethodByName(reflect.TypeOf(client.Bot), "EnsureBot", func(*pluginapi.BotService, *model.Bot, ...pluginapi.EnsureBotOption) (string, error) {
+					return "", errors.New("")
+				})
+				require.NoError(t, err)
+				return client, []*mpatch.Patch{p}
 			},
 			SetupStore:  func(s *mockstore.Store) *mockstore.Store { return s },
 			ShouldError: true,
@@ -89,9 +97,12 @@ func TestPluginOnActivate(t *testing.T) {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 1)...).Return(nil)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers {
-				helpers.On("EnsureBot", mock.AnythingOfType("*model.Bot"), mock.AnythingOfType("plugin.EnsureBotOption")).Return(testutils.GetBotUserID(), nil)
-				return helpers
+			SetupPluginAPI: func(client *pluginapi.Client) (*pluginapi.Client, []*mpatch.Patch) {
+				p, err := mpatch.PatchInstanceMethodByName(reflect.TypeOf(client.Bot), "EnsureBot", func(*pluginapi.BotService, *model.Bot, ...pluginapi.EnsureBotOption) (string, error) {
+					return testutils.GetBotUserID(), nil
+				})
+				require.NoError(t, err)
+				return client, []*mpatch.Patch{p}
 			},
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.ReacjiStore.On("Get").Return(nil, errors.New(""))
@@ -106,9 +117,12 @@ func TestPluginOnActivate(t *testing.T) {
 				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...).Return(nil)
 				return api
 			},
-			SetupHelpers: func(helpers *plugintest.Helpers) *plugintest.Helpers {
-				helpers.On("EnsureBot", mock.AnythingOfType("*model.Bot"), mock.AnythingOfType("plugin.EnsureBotOption")).Return(testutils.GetBotUserID(), nil)
-				return helpers
+			SetupPluginAPI: func(client *pluginapi.Client) (*pluginapi.Client, []*mpatch.Patch) {
+				p, err := mpatch.PatchInstanceMethodByName(reflect.TypeOf(client.Bot), "EnsureBot", func(*pluginapi.BotService, *model.Bot, ...pluginapi.EnsureBotOption) (string, error) {
+					return testutils.GetBotUserID(), nil
+				})
+				require.NoError(t, err)
+				return client, []*mpatch.Patch{p}
 			},
 			SetupStore: func(s *mockstore.Store) *mockstore.Store {
 				s.ReacjiStore.On("Get").Return(&reacji.List{}, nil)
@@ -120,18 +134,36 @@ func TestPluginOnActivate(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			a := test.SetupAPI(&plugintest.API{})
 			defer a.AssertExpectations(t)
-			h := test.SetupHelpers(&plugintest.Helpers{})
-			defer h.AssertExpectations(t)
 			s := test.SetupStore(&mockstore.Store{})
 			defer s.AssertExpectations(t)
 
-			patch := monkey.Patch(kvstore.NewStore, func(plugin.API, plugin.Helpers) store.Store {
-				return s
-			})
-			defer patch.Unpatch()
+			patch1, err := mpatch.PatchMethod(
+				kvstore.NewStore,
+				func(plugin.API, pluginapi.KVService) store.Store { return s },
+			)
+			require.NoError(t, err)
+			defer func() { require.NoError(t, patch1.Unpatch()) }()
 
-			p := setupTestPlugin(a, h, s)
-			err := p.OnActivate()
+			// Setup pluginapi client
+			mClient := pluginapi.NewClient(a, &plugintest.Driver{})
+			patch2, err := mpatch.PatchMethod(
+				pluginapi.NewClient,
+				func(plugin.API, plugin.Driver) *pluginapi.Client { return mClient },
+			)
+			require.NoError(t, err)
+			defer func() { require.NoError(t, patch2.Unpatch()) }()
+
+			if test.SetupPluginAPI != nil {
+				_, patches := test.SetupPluginAPI(mClient)
+				t.Cleanup(func() {
+					for _, p := range patches {
+						require.NoError(t, p.Unpatch())
+					}
+				})
+			}
+
+			p := setupTestPlugin(a, s)
+			err = p.OnActivate()
 
 			if test.ShouldError {
 				assert.Error(t, err)
@@ -147,12 +179,10 @@ func TestPluginOnDeactivate(t *testing.T) {
 		a := &plugintest.API{}
 		a.On("UnregisterCommand", "", CommandNameReacji).Return(nil)
 		defer a.AssertExpectations(t)
-		h := &plugintest.Helpers{}
-		defer h.AssertExpectations(t)
 		s := &mockstore.Store{}
 		defer s.AssertExpectations(t)
 
-		p := setupTestPlugin(a, h, s)
+		p := setupTestPlugin(a, s)
 		err := p.OnDeactivate()
 
 		assert.NoError(t, err)
@@ -161,12 +191,10 @@ func TestPluginOnDeactivate(t *testing.T) {
 		a := &plugintest.API{}
 		a.On("UnregisterCommand", "", CommandNameReacji).Return(errors.New(""))
 		defer a.AssertExpectations(t)
-		h := &plugintest.Helpers{}
-		defer h.AssertExpectations(t)
 		s := &mockstore.Store{}
 		defer s.AssertExpectations(t)
 
-		p := setupTestPlugin(a, h, s)
+		p := setupTestPlugin(a, s)
 		err := p.OnDeactivate()
 
 		assert.Error(t, err)
@@ -185,25 +213,25 @@ func TestPluginHasPermissionToChannel(t *testing.T) {
 	}{
 		"fine, public channel": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API { return api },
-			Channel:  &model.Channel{Id: channelID, Type: model.CHANNEL_OPEN},
+			Channel:  &model.Channel{Id: channelID, Type: model.ChannelTypeOpen},
 			UserID:   userID,
 			Expected: true,
 		},
 		"fine, private channel with permission": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("HasPermissionToChannel", userID, channelID, model.PERMISSION_READ_CHANNEL).Return(true)
+				api.On("HasPermissionToChannel", userID, channelID, model.PermissionReadChannel).Return(true)
 				return api
 			},
-			Channel:  &model.Channel{Id: channelID, Type: model.CHANNEL_PRIVATE},
+			Channel:  &model.Channel{Id: channelID, Type: model.ChannelTypePrivate},
 			UserID:   userID,
 			Expected: true,
 		},
 		"fine, private channel without permission": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("HasPermissionToChannel", userID, channelID, model.PERMISSION_READ_CHANNEL).Return(false)
+				api.On("HasPermissionToChannel", userID, channelID, model.PermissionReadChannel).Return(false)
 				return api
 			},
-			Channel:  &model.Channel{Id: channelID, Type: model.CHANNEL_PRIVATE},
+			Channel:  &model.Channel{Id: channelID, Type: model.ChannelTypePrivate},
 			UserID:   userID,
 			Expected: false,
 		},
@@ -211,12 +239,10 @@ func TestPluginHasPermissionToChannel(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			a := test.SetupAPI(&plugintest.API{})
 			defer a.AssertExpectations(t)
-			h := &plugintest.Helpers{}
-			defer h.AssertExpectations(t)
 			s := &mockstore.Store{}
 			defer s.AssertExpectations(t)
 
-			p := setupTestPlugin(a, h, s)
+			p := setupTestPlugin(a, s)
 			actual := p.HasPermissionToChannel(test.Channel, test.UserID)
 
 			assert.Equal(t, test.Expected, actual)

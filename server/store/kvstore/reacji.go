@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
 )
 
 const keyList = "reacjis_list"

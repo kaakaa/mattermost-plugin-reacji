@@ -1,12 +1,12 @@
 module github.com/kaakaa/mattermost-plugin-reacji
 
-go 1.12
+go 1.16
 
 require (
-	bou.ke/monkey v1.0.2
-	github.com/mattermost/ldap v3.0.4+incompatible // indirect
-	github.com/mattermost/mattermost-server/v5 v5.31.0
+	github.com/mattermost/mattermost-plugin-api v0.0.27
+	github.com/mattermost/mattermost-server/v6 v6.7.2
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.6.1
-	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
+	github.com/stretchr/testify v1.7.1
+	github.com/undefinedlabs/go-mpatch v1.0.6
+	golang.org/x/sys v0.0.0-20221013171732-95e765b1cc43 // indirect
 )

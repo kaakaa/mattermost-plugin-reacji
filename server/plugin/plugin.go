@@ -9,8 +9,9 @@ import (
 	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/store/kvstore"
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	pluginapi "github.com/mattermost/mattermost-plugin-api"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
 )
 
 const (
@@ -56,16 +57,14 @@ func (p *Plugin) OnActivate() error {
 		Username:    botUserName,
 		DisplayName: botDisplayName,
 	}
-	options := []plugin.EnsureBotOption{
-		plugin.ProfileImagePath("assets/logo.dio.png"),
-	}
-	botUserID, appErr := p.Helpers.EnsureBot(bot, options...)
-	if appErr != nil {
-		return errors.New(appErr.Error())
+	pluginAPI := pluginapi.NewClient(p.API, p.Driver)
+	botUserID, err := pluginAPI.Bot.EnsureBot(bot, pluginapi.ProfileImagePath("assets/logo.dio.png"))
+	if err != nil {
+		return fmt.Errorf("failed to ensure bot user %w", err)
 	}
 	p.botUserID = botUserID
 
-	p.Store = kvstore.NewStore(p.API, p.Helpers)
+	p.Store = kvstore.NewStore(p.API, pluginAPI.KV)
 	reacjiList, err := p.Store.Reacji().Get()
 	if err != nil {
 		return err
@@ -115,7 +114,7 @@ func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, fromChann
 
 		p.API.LogDebug("share post", "channel_id", r.ToChannelID, "post_id", post.Id, "user_id", p.botUserID)
 		newPost := &model.Post{
-			Type:      model.POST_DEFAULT,
+			Type:      model.PostTypeDefault,
 			UserId:    p.botUserID,
 			ChannelId: r.ToChannelID,
 			Message:   fmt.Sprintf("> Shared from ~%s. ([original post](%s))", fromChannel.Name, p.makePostLink(team.Name, post.Id)),
@@ -149,7 +148,7 @@ func (p *Plugin) ConvertUserIDToDisplayName(userID string) (string, *model.AppEr
 	if appErr != nil {
 		return "", appErr
 	}
-	return "@" + user.GetDisplayName(model.SHOW_USERNAME), nil
+	return "@" + user.GetDisplayName(model.ShowUsername), nil
 }
 
 func (p *Plugin) HasAdminPermission(reacji *reacji.Reacji, issuerID string) (bool, *model.AppError) {
@@ -161,15 +160,15 @@ func (p *Plugin) HasAdminPermission(reacji *reacji.Reacji, issuerID string) (boo
 	if appErr != nil {
 		return false, appErr
 	}
-	if user.IsInRole(model.SYSTEM_ADMIN_ROLE_ID) {
+	if user.IsInRole(model.SystemAdminRoleId) {
 		return true, nil
 	}
 	return false, nil
 }
 
 func (p *Plugin) HasPermissionToChannel(c *model.Channel, issuerID string) bool {
-	if c.Type != model.CHANNEL_OPEN {
-		if !p.API.HasPermissionToChannel(issuerID, c.Id, model.PERMISSION_READ_CHANNEL) {
+	if c.Type != model.ChannelTypeOpen {
+		if !p.API.HasPermissionToChannel(issuerID, c.Id, model.PermissionReadChannel) {
 			return false
 		}
 	}

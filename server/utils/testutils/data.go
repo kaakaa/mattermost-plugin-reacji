@@ -1,6 +1,6 @@
 package testutils
 
-import "github.com/mattermost/mattermost-server/v5/model"
+import "github.com/mattermost/mattermost-server/v6/model"
 
 // GetPostID returns a static Post ID.
 func GetPostID() string {

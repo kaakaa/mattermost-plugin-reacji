@@ -7,15 +7,16 @@ import (
 	"fmt"
 
 	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	pluginapi "github.com/mattermost/mattermost-plugin-api"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
 )
 
 const SharedKeyHeader = "shared-"
 
 type SharedStore struct {
-	api     plugin.API
-	helpers plugin.Helpers
+	api       plugin.API
+	kvService pluginapi.KVService
 }
 
 func (s *SharedStore) Get(postID, toChannelID, deleteKey string) (*reacji.SharedPost, error) {
@@ -62,17 +63,25 @@ func (s *SharedStore) Set(new *reacji.SharedPost, days int) error {
 }
 
 func (s *SharedStore) DeleteAll() (int, error) {
-	kvListOption := plugin.WithPrefix(SharedKeyHeader)
-	keys, err := s.helpers.KVListWithOptions(kvListOption)
-	if err != nil {
-		return -1, err
-	}
+	kvListOption := pluginapi.WithPrefix(SharedKeyHeader)
 	var count int
-	for _, k := range keys {
-		if err := s.api.KVDelete(k); err != nil {
+	page, perPage := 0, 100
+	// TODO: need to test if this loop works fine
+	for {
+		keys, err := s.kvService.ListKeys(page, perPage, kvListOption)
+		if err != nil {
 			return -1, err
 		}
-		count++
+		for _, k := range keys {
+			if err := s.api.KVDelete(k); err != nil {
+				return -1, err
+			}
+			count++
+		}
+		if len(keys) < perPage {
+			break
+		}
+		page++
 	}
 	return count, nil
 }

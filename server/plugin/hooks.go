@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
 )
 
 // ReactionHasBeenAdded shares a post if registered reaction is attached to a post
@@ -61,7 +61,7 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 		return post, ""
 	}
 
-	if channel.Type == model.CHANNEL_DIRECT || channel.Type == model.CHANNEL_GROUP {
+	if channel.Type == model.ChannelTypeDirect || channel.Type == model.ChannelTypeGroup {
 		return post, ""
 	}
 
@@ -107,7 +107,7 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 		}
 		oldPostCreateAt := time.Unix(oldPost.CreateAt/1000, 0)
 
-		AuthorName := postUser.GetDisplayNameWithPrefix(model.SHOW_NICKNAME_FULLNAME, "@")
+		AuthorName := postUser.GetDisplayNameWithPrefix(model.ShowNicknameFullName, "@")
 		if postUser.IsBot {
 			botUser := model.BotFromUser(postUser)
 			AuthorName = botUser.DisplayName

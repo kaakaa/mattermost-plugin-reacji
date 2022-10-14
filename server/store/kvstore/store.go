@@ -2,7 +2,8 @@ package kvstore
 
 import (
 	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	pluginapi "github.com/mattermost/mattermost-plugin-api"
+	"github.com/mattermost/mattermost-server/v6/plugin"
 )
 
 type Store struct {
@@ -11,11 +12,11 @@ type Store struct {
 	SharedStore SharedStore
 }
 
-func NewStore(api plugin.API, helpers plugin.Helpers) store.Store {
+func NewStore(api plugin.API, kvService pluginapi.KVService) store.Store {
 	return &Store{
 		api:         api,
 		ReacjiStore: ReacjiStore{api: api},
-		SharedStore: SharedStore{api: api, helpers: helpers},
+		SharedStore: SharedStore{api: api, kvService: kvService},
 	}
 }
 
