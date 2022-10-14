@@ -1,6 +1,6 @@
 module github.com/kaakaa/mattermost-plugin-reacji
 
-go 1.16
+go 1.19
 
 require (
 	github.com/mattermost/mattermost-plugin-api v0.0.27
