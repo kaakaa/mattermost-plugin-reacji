@@ -5,11 +5,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
-	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
-	"github.com/kaakaa/mattermost-plugin-reacji/server/store/kvstore"
-	"github.com/kaakaa/mattermost-plugin-reacji/server/store/mockstore"
-	"github.com/kaakaa/mattermost-plugin-reacji/server/utils/testutils"
 	pluginapi "github.com/mattermost/mattermost-plugin-api"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/mattermost/mattermost-server/v6/plugin"
@@ -18,6 +13,12 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/undefinedlabs/go-mpatch"
+
+	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
+	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
+	"github.com/kaakaa/mattermost-plugin-reacji/server/store/kvstore"
+	"github.com/kaakaa/mattermost-plugin-reacji/server/store/mockstore"
+	"github.com/kaakaa/mattermost-plugin-reacji/server/utils/testutils"
 )
 
 func setupTestPlugin(api *plugintest.API, store *mockstore.Store) *Plugin {

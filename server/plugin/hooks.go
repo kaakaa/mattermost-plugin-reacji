@@ -6,9 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/mattermost/mattermost-server/v6/plugin"
+
+	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 )
 
 // ReactionHasBeenAdded shares a post if registered reaction is attached to a post

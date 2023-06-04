@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
-	"github.com/kaakaa/mattermost-plugin-reacji/server/store/mockstore"
-	"github.com/kaakaa/mattermost-plugin-reacji/server/utils/testutils"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/mattermost/mattermost-server/v6/plugin"
 	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
+	"github.com/kaakaa/mattermost-plugin-reacji/server/store/mockstore"
+	"github.com/kaakaa/mattermost-plugin-reacji/server/utils/testutils"
 )
 
 func TestPluginExecuteCommend(t *testing.T) {

@@ -6,9 +6,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/mattermost/mattermost-server/v6/plugin"
+
+	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 )
 
 func (p *Plugin) registerCommand() error {

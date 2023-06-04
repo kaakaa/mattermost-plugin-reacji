@@ -3,10 +3,11 @@ package kvstore
 import (
 	"testing"
 
-	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 )
 
 func TestReacjiStoreGet(t *testing.T) {

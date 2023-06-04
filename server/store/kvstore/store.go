@@ -1,9 +1,10 @@
 package kvstore
 
 import (
-	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
 	pluginapi "github.com/mattermost/mattermost-plugin-api"
 	"github.com/mattermost/mattermost-server/v6/plugin"
+
+	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
 )
 
 type Store struct {

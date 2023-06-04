@@ -6,12 +6,13 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
-	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
-	"github.com/kaakaa/mattermost-plugin-reacji/server/store/kvstore"
 	pluginapi "github.com/mattermost/mattermost-plugin-api"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/mattermost/mattermost-server/v6/plugin"
+
+	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
+	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
+	"github.com/kaakaa/mattermost-plugin-reacji/server/store/kvstore"
 )
 
 const (
