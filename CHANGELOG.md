@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.5.2](https://github.com/kaakaa/mattermost-plugin-reacji/compare/v0.5.1...v0.5.2) - 2024-05-04
+- Tagpr by @kaakaa in https://github.com/kaakaa/mattermost-plugin-reacji/pull/29
+
 ## [v0.5.1](https://github.com/kaakaa/mattermost-plugin-reacji/compare/v0.5.0...v0.5.1) - 2024-05-04
 - tagpr by @kaakaa in https://github.com/kaakaa/mattermost-plugin-reacji/pull/25
 - delete unnecessary file by @kaakaa in https://github.com/kaakaa/mattermost-plugin-reacji/pull/28
