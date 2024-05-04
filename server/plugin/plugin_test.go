@@ -58,7 +58,6 @@ func TestPluginOnActivate(t *testing.T) {
 		SetupStore     func(*mockstore.Store) *mockstore.Store
 		ShouldError    bool
 	}{
-		// Disable this test because mocking store.Store is not work fine.
 		"fine": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("RegisterCommand", mock.AnythingOfType("*model.Command")).Return(nil)
