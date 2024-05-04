@@ -2,3 +2,4 @@
     vPrefix = true
     releaseBranch = master
     release = false
+	versionFile = -
