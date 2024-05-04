@@ -13,7 +13,7 @@ import (
 )
 
 // ReactionHasBeenAdded shares a post if registered reaction is attached to a post
-func (p *Plugin) ReactionHasBeenAdded(c *plugin.Context, reaction *model.Reaction) {
+func (p *Plugin) ReactionHasBeenAdded(_ *plugin.Context, reaction *model.Reaction) {
 	postID := reaction.PostId
 	emojiName := reaction.EmojiName
 
@@ -48,11 +48,11 @@ func (p *Plugin) ReactionHasBeenAdded(c *plugin.Context, reaction *model.Reactio
 		}
 	}
 
-	go p.sharePost(reacjis, post, channelID, reaction.UserId)
+	go p.sharePost(reacjis, post, channelID)
 }
 
 // MessageWillBePosted expand contents of permalink of local post
-func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*model.Post, string) {
+func (p *Plugin) MessageWillBePosted(_ *plugin.Context, post *model.Post) (*model.Post, string) {
 	if _, ok := post.GetProps()[SharedPostPropKey]; !ok {
 		return post, ""
 	}

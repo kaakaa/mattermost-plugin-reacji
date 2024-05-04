@@ -74,23 +74,23 @@ func TestReacjiStoreGet(t *testing.T) {
 func TestReacjiStoreUpdate(t *testing.T) {
 	t.Run("all fine", func(t *testing.T) {
 		prev := &reacji.List{}
-		new := &reacji.List{}
+		newList := &reacji.List{}
 		opt := model.PluginKVSetOptions{
 			Atomic:   true,
 			OldValue: prev.EncodeToByte(),
 		}
 
 		api := &plugintest.API{}
-		api.On("KVSetWithOptions", keyList, new.EncodeToByte(), opt).Return(true, nil)
+		api.On("KVSetWithOptions", keyList, newList.EncodeToByte(), opt).Return(true, nil)
 		defer api.AssertExpectations(t)
 		store := setupTestStore(api)
 
-		err := store.Reacji().Update(prev, new)
+		err := store.Reacji().Update(prev, newList)
 		assert.NoError(t, err)
 	})
 	t.Run("KVSetWithOptions fail", func(t *testing.T) {
 		prev := &reacji.List{}
-		new := &reacji.List{}
+		newList := &reacji.List{}
 		opt := model.PluginKVSetOptions{
 			Atomic:   true,
 			OldValue: prev.EncodeToByte(),
@@ -98,27 +98,27 @@ func TestReacjiStoreUpdate(t *testing.T) {
 		appErr := &model.AppError{}
 
 		api := &plugintest.API{}
-		api.On("KVSetWithOptions", keyList, new.EncodeToByte(), opt).Return(false, appErr)
+		api.On("KVSetWithOptions", keyList, newList.EncodeToByte(), opt).Return(false, appErr)
 		defer api.AssertExpectations(t)
 		store := setupTestStore(api)
 
-		err := store.Reacji().Update(prev, new)
+		err := store.Reacji().Update(prev, newList)
 		assert.Error(t, err)
 	})
 	t.Run("KVSetWithOptions error", func(t *testing.T) {
 		prev := &reacji.List{}
-		new := &reacji.List{}
+		newList := &reacji.List{}
 		opt := model.PluginKVSetOptions{
 			Atomic:   true,
 			OldValue: prev.EncodeToByte(),
 		}
 
 		api := &plugintest.API{}
-		api.On("KVSetWithOptions", keyList, new.EncodeToByte(), opt).Return(false, nil)
+		api.On("KVSetWithOptions", keyList, newList.EncodeToByte(), opt).Return(false, nil)
 		defer api.AssertExpectations(t)
 		store := setupTestStore(api)
 
-		err := store.Reacji().Update(prev, new)
+		err := store.Reacji().Update(prev, newList)
 		assert.Error(t, err)
 	})
 }
