@@ -1,9 +1,10 @@
 package mockstore
 
 import (
+	"github.com/stretchr/testify/mock"
+
 	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
 	"github.com/kaakaa/mattermost-plugin-reacji/server/store/mockstore/mocks"
-	"github.com/stretchr/testify/mock"
 )
 
 type Store struct {

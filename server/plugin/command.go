@@ -6,9 +6,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/mattermost/mattermost-server/v6/plugin"
+
+	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 )
 
 func (p *Plugin) registerCommand() error {
@@ -23,7 +24,7 @@ func (p *Plugin) registerCommand() error {
 	})
 }
 
-func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
+func (p *Plugin) ExecuteCommand(_ *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
 	userID := args.UserId
 	FromChannelID := args.ChannelId
 	cmdElements := strings.Split(strings.TrimSpace(args.Command), " ")
@@ -112,12 +113,12 @@ func (p *Plugin) isAvailableEmoji(name string) bool {
 }
 
 func (p *Plugin) storeReacjis(userID, teamID, fromChannelID string, emojiNames, toChannelIds []string) error {
-	new := p.reacjiList.Clone()
+	newList := p.reacjiList.Clone()
 	count := 0
 	for _, emoji := range emojiNames {
 		for _, to := range toChannelIds {
 			if !exists(p.reacjiList, emoji, teamID, to) {
-				new.Reacjis = append(new.Reacjis, &reacji.Reacji{
+				newList.Reacjis = append(newList.Reacjis, &reacji.Reacji{
 					DeleteKey:     model.NewId(),
 					Creator:       userID,
 					TeamID:        teamID,
@@ -132,11 +133,11 @@ func (p *Plugin) storeReacjis(userID, teamID, fromChannelID string, emojiNames, 
 	if count == 0 {
 		return errors.New("reacji is already registered")
 	}
-	if err := p.Store.Reacji().Update(p.reacjiList, new); err != nil {
+	if err := p.Store.Reacji().Update(p.reacjiList, newList); err != nil {
 		return err
 	}
-	p.reacjiList = new
-	p.API.LogDebug("reacjis is updated", "reacjis", fmt.Sprintf("%v", new.Reacjis))
+	p.reacjiList = newList
+	p.API.LogDebug("reacjis is updated", "reacjis", fmt.Sprintf("%v", newList.Reacjis))
 	return nil
 }
 
@@ -150,24 +151,22 @@ func exists(list *reacji.List, emoji, teamID, to string) bool {
 }
 
 func (p *Plugin) remove(userID string, keys []string) (*model.CommandResponse, *model.AppError) {
-	new := &reacji.List{}
+	newList := &reacji.List{}
 	var failed []*reacji.Reacji
 	for _, r := range p.reacjiList.Reacjis {
 		if include(keys, r.DeleteKey) {
-			if b, _ := p.HasAdminPermission(r, userID); b {
-				continue
-			} else {
+			if b, _ := p.HasAdminPermission(r, userID); !b {
 				failed = append(failed, r)
-				new.Reacjis = append(new.Reacjis, r)
+				newList.Reacjis = append(newList.Reacjis, r)
 			}
 		} else {
-			new.Reacjis = append(new.Reacjis, r)
+			newList.Reacjis = append(newList.Reacjis, r)
 		}
 	}
-	if err := p.Store.Reacji().Update(p.reacjiList, new); err != nil {
+	if err := p.Store.Reacji().Update(p.reacjiList, newList); err != nil {
 		return &model.CommandResponse{Text: "failed to remove reacjis"}, nil
 	}
-	p.reacjiList = new
+	p.reacjiList = newList
 	if len(failed) == 0 {
 		return &model.CommandResponse{Text: "Reacjis are removed"}, nil
 	}
@@ -199,13 +198,13 @@ func (p *Plugin) removeAll(userID string) (*model.CommandResponse, *model.AppErr
 			Text: "Failed to remove emojis due to invalid permission " + appendix,
 		}, nil
 	}
-	new := &reacji.List{}
-	if err := p.Store.Reacji().Update(p.reacjiList, new); err != nil {
+	newList := &reacji.List{}
+	if err := p.Store.Reacji().Update(p.reacjiList, newList); err != nil {
 		return &model.CommandResponse{
 			Text: err.Error(),
 		}, nil
 	}
-	p.reacjiList = new
+	p.reacjiList = newList
 	return &model.CommandResponse{
 		Text: "All reacjis are removed.",
 	}, nil
@@ -223,13 +222,13 @@ func (p *Plugin) forceRemoveAll(userID string) (*model.CommandResponse, *model.A
 		}, nil
 	}
 
-	new := &reacji.List{}
-	if err := p.Store.Reacji().ForceUpdate(new); err != nil {
+	newList := &reacji.List{}
+	if err := p.Store.Reacji().ForceUpdate(newList); err != nil {
 		return &model.CommandResponse{
 			Text: err.Error(),
 		}, nil
 	}
-	p.reacjiList = new
+	p.reacjiList = newList
 	return &model.CommandResponse{
 		Text: "All reacjis are removed.",
 	}, nil

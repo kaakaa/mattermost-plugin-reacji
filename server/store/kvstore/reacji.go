@@ -3,9 +3,10 @@ package kvstore
 import (
 	"errors"
 
-	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/mattermost/mattermost-server/v6/plugin"
+
+	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 )
 
 const keyList = "reacjis_list"

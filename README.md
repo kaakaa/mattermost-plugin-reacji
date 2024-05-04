@@ -1,4 +1,4 @@
-[![kaakaa](https://circleci.com/gh/kaakaa/mattermost-plugin-reacji.svg?style=svg)](https://circleci.com/gh/kaakaa/mattermost-plugin-reacji)
+[![ci](https://github.com/kaakaa/mattermost-plugin-reacji/actions/workflows/ci.yml/badge.svg)](https://github.com/kaakaa/mattermost-plugin-reacji/actions/workflows/ci.yml)
 
 # Mattermost Plugin Reacji
 

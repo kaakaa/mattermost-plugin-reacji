@@ -6,12 +6,13 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
-	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
-	"github.com/kaakaa/mattermost-plugin-reacji/server/store/kvstore"
 	pluginapi "github.com/mattermost/mattermost-plugin-api"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/mattermost/mattermost-server/v6/plugin"
+
+	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
+	"github.com/kaakaa/mattermost-plugin-reacji/server/store"
+	"github.com/kaakaa/mattermost-plugin-reacji/server/store/kvstore"
 )
 
 const (
@@ -42,7 +43,7 @@ type Plugin struct { // nolint: govet
 }
 
 // ServeHTTP demonstrates a plugin that handles HTTP requests by greeting the world.
-func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
+func (p *Plugin) ServeHTTP(_ *plugin.Context, w http.ResponseWriter, _ *http.Request) {
 	fmt.Fprint(w, "Hello, world!")
 }
 
@@ -87,7 +88,7 @@ func (p *Plugin) OnDeactivate() error {
 	return nil
 }
 
-func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, fromChannelID, userID string) {
+func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, fromChannelID string) {
 	for _, r := range reacjis {
 		shared, err := p.Store.Shared().Get(post.Id, r.ToChannelID, r.DeleteKey)
 		if err != nil {
@@ -126,13 +127,13 @@ func (p *Plugin) sharePost(reacjis []*reacji.Reacji, post *model.Post, fromChann
 		}
 
 		if p.getConfiguration().DaysToKeepSharedRecord > 0 {
-			new := &reacji.SharedPost{
+			newList := &reacji.SharedPost{
 				PostID:       post.Id,
 				ToChannelID:  r.ToChannelID,
 				SharedPostID: newPost.Id,
 				Reacji:       *r,
 			}
-			if err := p.Store.Shared().Set(new, p.getConfiguration().DaysToKeepSharedRecord); err != nil {
+			if err := p.Store.Shared().Set(newList, p.getConfiguration().DaysToKeepSharedRecord); err != nil {
 				p.API.LogWarn("failed to set share post", "post_id", post.Id, "to_channel_id", r.ToChannelID, err.Error())
 			}
 		}

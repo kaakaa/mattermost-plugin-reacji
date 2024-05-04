@@ -3,8 +3,9 @@ package reacji
 import (
 	"testing"
 
-	"github.com/kaakaa/mattermost-plugin-reacji/server/utils/testutils"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/kaakaa/mattermost-plugin-reacji/server/utils/testutils"
 )
 
 func TestReacjiListClone(t *testing.T) {
