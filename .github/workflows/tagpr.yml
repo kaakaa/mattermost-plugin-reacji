@@ -1,3 +1,4 @@
+# Need to use PAT (not `secrets_GITHUB_TOKEN`) to run cd workflow
 name: tagpr
 on:
   push:
