@@ -1,3 +1,4 @@
+# Need to use PAT (not `secrets_GITHUB_TOKEN`) to run cd workflow
 name: tagpr
 on:
   push:
@@ -7,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_PAT }}
     - uses: Songmu/tagpr@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_PAT }}
