@@ -8,12 +8,13 @@ Mattermost Reacji plugin inspired by [Slack's Reacji Channeler](https://reacji-c
 
 ## Install
 
-Download plugin from [Releases](https://github.com/kaakaa/mattermost-plugin-reacji/releases/latest) and Install plugin in **System Console > Plugin > Plugin Management**  
-[Plugins \(Beta\)](https://docs.mattermost.com/administration/plugins.html#set-up-guide)
+Download Reacji plugin file from [Releases](https://github.com/kaakaa/mattermost-plugin-reacji/releases/latest) and Install plugin in **System Console > Plugin > Plugin Management**  
+
+[Use and manage plugins](https://developers.mattermost.com/integrate/plugins/using-and-managing-plugins/#custom-plugins)
 
 ### Settings
 
-Change settings for this plugin in **System Console > Plugins(Beta) > Reacji Channeler**.
+Change settings for this plugin in **System Console > Plugins > Reacji Channeler**.
 
 -   **Allow duplicate sharing**: Setting to determine if posts that have already been shared should be shared again each time a reaction is attached.
 -   **Days to keep shared record**: After the number of days for this setting has passed, posts that have been shared once will be share again even if **Allow duplicate shareing** is `false`.
@@ -38,7 +39,6 @@ Change settings for this plugin in **System Console > Plugins(Beta) > Reacji Cha
 ### Allow to share posts in private channel
 
 1. Invite `Reacji Bot` to the team from **Main Menu > Invite People**
-    - ![invite reacji-bot](./sc-invite-reacjibot.png)
 2. Invite `Reacji Bot` to the private channel where you want to share posts by reacji
 3. Add reacji to channels (e.g. execute `/reacji add :+1: ~off-topic`)
 4. React to any posts in the private channel where `Reacji Bot` is member
