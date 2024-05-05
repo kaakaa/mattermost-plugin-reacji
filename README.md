@@ -39,7 +39,6 @@ Change settings for this plugin in **System Console > Plugins > Reacji Channeler
 ### Allow to share posts in private channel
 
 1. Invite `Reacji Bot` to the team from **Main Menu > Invite People**
-    - ![invite reacji-bot](./sc-invite-reacjibot.png)
 2. Invite `Reacji Bot` to the private channel where you want to share posts by reacji
 3. Add reacji to channels (e.g. execute `/reacji add :+1: ~off-topic`)
 4. React to any posts in the private channel where `Reacji Bot` is member
