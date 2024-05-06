@@ -1,15 +1,16 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 import styled from 'styled-components';
 
-import {GlobalState} from '@mattermost/types/lib/store';
-import {Channel} from 'mattermost-redux/types/channels';
+import {GlobalState} from '@mattermost/types/store';
+import {Channel} from '@mattermost/types/channels';
 
-import { getChannel, getChannelsNameMapInCurrentTeam } from 'mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/selectors/entities/channels';
-import { getCurrentTeam } from 'mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/selectors/entities/teams';
+import {getChannel, getChannelsNameMapInCurrentTeam} from 'mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/selectors/entities/channels';
+import {getCurrentTeam} from 'mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/selectors/entities/teams';
 
 import {getSiteURL} from '@/client';
 
+// @ts-ignore
 const PostUtils = window.PostUtils;
 
 type RhsRowProps = {
@@ -24,13 +25,13 @@ const RhsRow = ({emojiName, channelId}: RhsRowProps) => {
 
     const c = PostUtils.messageHtmlToComponent(
         PostUtils.formatText(`:${emojiName}:`),
-        true
+        true,
     );
 
     const channel = useSelector<GlobalState>((state) => getChannel(state, channelId)) as Channel;
     const ch = PostUtils.messageHtmlToComponent(
-        PostUtils.formatText(`~${channel.name}`, {siteURL: siteURL, channelNamesMap: channelNamesMap, team: currentTeam}),
-        true
+        PostUtils.formatText(`~${channel.name}`, {siteURL, channelNamesMap, team: currentTeam}),
+        true,
     );
 
     return (
@@ -39,12 +40,12 @@ const RhsRow = ({emojiName, channelId}: RhsRowProps) => {
             <RhsCell>{ch}</RhsCell>
             <RhsCell><DeleteButton>{'DELETE'}</DeleteButton></RhsCell>
         </tr>
-    )
+    );
 };
 
 const RhsCell = styled.td`
     vertical-align: middle;
-`
+`;
 
 const DeleteButton = styled.button`
     color: #AA043D;
@@ -56,6 +57,6 @@ const DeleteButton = styled.button`
         background-color: #AA043D;
         color: white;
     }
-`
+`;
 
 export default RhsRow;

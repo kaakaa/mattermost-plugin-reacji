@@ -9,6 +9,9 @@
          "version": "16.14.0"
       }
    },
+   "ignorePatterns": [
+      "mattermost-webapp/**/*"
+   ],
    "extends": [
       "eslint:recommended",
       "plugin:react-hooks/recommended",

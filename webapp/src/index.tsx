@@ -1,6 +1,6 @@
 import {Store, Action} from 'redux';
 
-import {GlobalState} from '@mattermost/types/lib/store';
+import {GlobalState} from '@mattermost/types/store';
 
 import manifest from '@/manifest';
 
@@ -20,7 +20,7 @@ export default class Plugin {
         const {toggleRHSPlugin} = registry.registerRightHandSidebarComponent(RhsView, 'Reacji List');
 
         if (registry.registerAppBarComponent) {
-            registry.registerAppBarComponent(getIconURL(), () => store.dispatch(toggleRHSPlugin), 'Show Reacjis in current channel')
+            registry.registerAppBarComponent(getIconURL(), () => store.dispatch(toggleRHSPlugin), 'Show Reacjis in current channel');
         }
     }
 }

@@ -1,8 +1,7 @@
 import {useEffect, useState} from 'react';
 
-import { fetchReacjiListByChannelId } from '@/client';
-
-interface Reacji {}
+import {Reacji} from '@/types/types';
+import {fetchReacjiListByChannelId} from '@/client';
 
 export const useReacjiList = (channelId: string) => {
     const [reacjiList, setReacjiList] = useState<Reacji[]>([]);
@@ -10,7 +9,7 @@ export const useReacjiList = (channelId: string) => {
         const fetchReacjiList = async () => {
             const data = await fetchReacjiListByChannelId(channelId);
             setReacjiList(data);
-        }
+        };
         fetchReacjiList();
     }, [channelId]);
     return reacjiList;

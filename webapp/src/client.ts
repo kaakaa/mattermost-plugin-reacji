@@ -20,7 +20,7 @@ export const getSiteURL = ():string => {
 
 export const getIconURL = ():string => {
     return `${pluginEndpoint}/public/logo.dio.png`;
-}
+};
 
 export const fetchReacjiListByChannelId = async (channelId: string | null) => {
     let url = `${pluginEndpoint}/api/v1/reacjis`;
@@ -39,7 +39,6 @@ export const doGet = async (url: string) => {
         },
     });
 
-    console.log('response', response, url);
     if (!response.ok) {
         throw new Error(`Failed to fetch: ${response.statusText}`);
     }
