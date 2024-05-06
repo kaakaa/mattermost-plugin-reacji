@@ -3,9 +3,9 @@ package plugin
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"sync"
 
+	"github.com/gorilla/mux"
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
@@ -29,9 +29,11 @@ const (
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
 type Plugin struct { // nolint: govet
 	plugin.MattermostPlugin
-	botUserID  string
-	reacjiList *reacji.List
-	Store      store.Store
+	botUserID     string
+	router        *mux.Router
+	reacjiList    *reacji.List
+	Store         store.Store
+	PluginVersion string
 
 	// configurationLock synchronizes access to the configuration.
 	configurationLock sync.RWMutex
@@ -40,11 +42,6 @@ type Plugin struct { // nolint: govet
 	// setConfiguration for usage.
 	configuration *configuration
 	ServerConfig  *model.Config
-}
-
-// ServeHTTP demonstrates a plugin that handles HTTP requests by greeting the world.
-func (p *Plugin) ServeHTTP(_ *plugin.Context, w http.ResponseWriter, _ *http.Request) {
-	fmt.Fprint(w, "Hello, world!")
 }
 
 func (p *Plugin) OnActivate() error {
@@ -78,6 +75,9 @@ func (p *Plugin) OnActivate() error {
 	}
 	p.configuration = p.getConfiguration()
 	p.API.LogDebug("slash command is initialized")
+
+	p.router = p.initAPI()
+
 	return nil
 }
 

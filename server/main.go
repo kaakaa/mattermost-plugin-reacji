@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	mmplugin.ClientMain(&plugin.Plugin{})
+	mmplugin.ClientMain(&plugin.Plugin{PluginVersion: manifest.Version})
 }
