@@ -14,6 +14,10 @@ export const setSiteURL = (url: string, pluginId: string) => {
     pluginEndpoint = `${basePath}/plugins/${pluginId}`;
 };
 
+export const getSiteURL = ():string => {
+    return siteURL;
+};
+
 export const getIconURL = ():string => {
     return `${pluginEndpoint}/public/logo.dio.png`;
 }

@@ -17,10 +17,10 @@ export default class Plugin {
         // @see https://developers.mattermost.com/extend/plugins/webapp/reference/
         setSiteURL(getConfig(store.getState())?.SiteURL || '', manifest.id);
 
-        const {toggleRHSPlugin} = registry.registerRightHandSidebarComponent(RhsView, 'reacji-rhs');
+        const {toggleRHSPlugin} = registry.registerRightHandSidebarComponent(RhsView, 'Reacji List');
 
         if (registry.registerAppBarComponent) {
-            registry.registerAppBarComponent(getIconURL(), () => store.dispatch(toggleRHSPlugin), 'Show Reacji list')
+            registry.registerAppBarComponent(getIconURL(), () => store.dispatch(toggleRHSPlugin), 'Show Reacjis in current channel')
         }
     }
 }
