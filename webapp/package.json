@@ -26,7 +26,6 @@
     "@babel/runtime": "7.16.7",
     "@emotion/babel-preset-css-prop": "11.2.0",
     "@emotion/core": "10.3.1",
-    "@mattermost/client": "file:mattermost-webapp/webapp/platform/client",
     "@mattermost/types": "file:mattermost-webapp/webapp/platform/types",
     "@testing-library/jest-dom": "5.16.1",
     "@types/babel__core": "7.1.18",
@@ -92,7 +91,8 @@
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/non_npm_dependencies/"
+      "/non_npm_dependencies/",
+      "/mattermost-webapp/"
     ],
     "clearMocks": true,
     "collectCoverageFrom": [
@@ -108,8 +108,6 @@
       "^.*i18n.*\\.(json)$": "<rootDir>/tests/i18n_mock.json",
       "^bundle-loader\\?lazy\\!(.*)$": "$1",
       "^@mattermost/types/(.*)$": "<rootDir>/mattermost-webapp/webapp/platform/types/src/$1",
-      "^@mattermost/client$": "<rootDir>/mattermost-webapp/webapp/platform/client/src/index",
-      "^@mattermost/client/(.*)$": "<rootDir>/mattermost-webapp/webapp/platform/client/src/$1",
       "^mattermost-redux(.*)$": "<rootDir>/mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src$1",
       "^reselect": "<rootDir>/mattermost-webapp/webapp/channels/src/packages/reselect/src$1"
     },

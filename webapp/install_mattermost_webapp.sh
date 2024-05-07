@@ -1,4 +1,5 @@
-readonly COMMITHASH=c943ed6859b1be013e4da92b1952c607a35258bc
+# a5c2f37... is a previous commit of upgrading node version to v20
+readonly COMMITHASH=a5c2f37d183c49a952ad4aa59ef1e68a7052d8cb
 
 echo "\n\nInstalling mattermost-webapp from the mattermost repo, using commit hash $COMMITHASH\n"
 
@@ -20,4 +21,3 @@ git reset --hard FETCH_HEAD
 cd ..
 npm i --save-dev ./mattermost-webapp/webapp/channels
 npm i --save-dev ./mattermost-webapp/webapp/platform/types
-npm i --save-dev ./mattermost-webapp/webapp/platform/client

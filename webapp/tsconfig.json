@@ -1,15 +1,6 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"],
-      "@mattermost/types/*": ["../webapp/mattermost-webapp/webapp/platform/types/src/*"],
-      "@mattermost/client": ["../webapp/mattermost-webapp/webapp/platform/client/src"],
-      "@mattermost/client/*": ["../webapp/mattermost-webapp/webapp/platform/client/src/*"],
-      "mattermost-redux/*": ["../webapp/mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/*"],
-      "reselect": ["../webapp/mattermost-webapp/webapp/channels/src/packages/reselect/src/*"],
-    },
+    "target": "ES6",
     "lib": [
       "dom",
       "dom.iterable",
@@ -27,8 +18,24 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "useUnknownInCatchVariables": false,
     "experimentalDecorators": true,
-    "jsx": "react"
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@mattermost/types/*": [
+        "./mattermost-webapp/webapp/platform/types/src/*"
+      ],
+      "mattermost-redux/*": [
+        "./mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/*"
+      ],
+      "reselect": [
+        "./mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/selectors/create_selector/index"
+      ]
+    }
   },
   "include": [
     "./**/*"
