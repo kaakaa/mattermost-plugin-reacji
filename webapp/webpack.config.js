@@ -38,7 +38,7 @@ const config = {
             '@': path.resolve(__dirname, 'src'),
             '@mattermost/types': path.resolve(__dirname, './mattermost-webapp/webapp/platform/types/src/'),
             'mattermost-redux': path.resolve(__dirname, './mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/'),
-            reselect: path.resolve(__dirname, './mattermost-webapp/webapp/channels/src/packages/reselect/src'),
+            reselect: path.resolve(__dirname, './mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/selectors/create_selector/index'),
         },
         modules: [
             'src',

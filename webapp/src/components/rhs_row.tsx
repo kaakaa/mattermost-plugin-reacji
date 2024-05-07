@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import {GlobalState} from '@mattermost/types/store';
 import {Channel} from '@mattermost/types/channels';
 
-import {getChannel, getChannelsNameMapInCurrentTeam} from 'mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/selectors/entities/channels';
-import {getCurrentTeam} from 'mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/selectors/entities/teams';
+import {getChannel, getChannelsNameMapInCurrentTeam} from 'mattermost-redux/selectors/entities/channels';
+import {getCurrentTeam} from 'mattermost-redux/selectors/entities/teams';
 
 import {getSiteURL} from '@/client';
 

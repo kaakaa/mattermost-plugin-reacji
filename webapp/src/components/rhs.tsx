@@ -7,8 +7,8 @@ import {Reacji} from '@/types/types';
 import {GlobalState} from '@mattermost/types/store';
 import {Channel} from '@mattermost/types/channels';
 
-import {getCurrentChannelId} from 'mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/selectors/entities/common';
-import {getChannel} from 'mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/selectors/entities/channels';
+import {getCurrentChannelId} from 'mattermost-redux/selectors/entities/common';
+import {getChannel} from 'mattermost-redux/selectors/entities/channels';
 
 import {useReacjiList} from '@/hooks/general';
 import RhsRow from '@/components/rhs_row';
