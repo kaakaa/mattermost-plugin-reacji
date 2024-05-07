@@ -7,8 +7,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 	"github.com/mattermost/mattermost/server/public/plugin"
+
+	"github.com/kaakaa/mattermost-plugin-reacji/server/reacji"
 )
 
 func (p *Plugin) initAPI() *mux.Router {
@@ -27,7 +28,9 @@ func (p *Plugin) ServeHTTP(_ *plugin.Context, w http.ResponseWriter, r *http.Req
 }
 
 func (p *Plugin) handleInfo(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, fmt.Sprintf("Mattermost Reacji Plugin %s\n", p.PluginVersion))
+	if _, err := io.WriteString(w, fmt.Sprintf("Mattermost Reacji Plugin %s\n", p.PluginVersion)); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (p *Plugin) handleGetReacjiList(w http.ResponseWriter, r *http.Request) {
@@ -37,10 +40,10 @@ func (p *Plugin) handleGetReacjiList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var ret []*reacji.Reacji
-	channelId := r.URL.Query().Get("channel_id")
-	if channelId != "" {
+	channelID := r.URL.Query().Get("channel_id")
+	if channelID != "" {
 		for _, e := range list.Reacjis {
-			if e.FromChannelID == channelId || e.FromChannelID == FromAllChannelKeyword {
+			if e.FromChannelID == channelID || e.FromChannelID == FromAllChannelKeyword {
 				ret = append(ret, e)
 			}
 		}
@@ -49,7 +52,7 @@ func (p *Plugin) handleGetReacjiList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewEncoder(w).Encode(ret); err != nil {
-		p.API.LogWarn("failed to write reacji list", "error", err.Error(), "channel_id", channelId)
+		p.API.LogWarn("failed to write reacji list", "error", err.Error(), "channel_id", channelID)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
