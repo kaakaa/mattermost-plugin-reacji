@@ -1,0 +1,49 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "useUnknownInCatchVariables": false,
+    "experimentalDecorators": true,
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@mattermost/types/*": [
+        "./mattermost-webapp/webapp/platform/types/src/*"
+      ],
+      "mattermost-redux/*": [
+        "./mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/*"
+      ],
+      "reselect": [
+        "./mattermost-webapp/webapp/channels/src/packages/mattermost-redux/src/selectors/create_selector/index"
+      ]
+    }
+  },
+  "include": [
+    "./**/*"
+  ],
+  "exclude": [
+    "dist",
+    "!node_modules/@types",
+    "mattermost-webapp",
+    "!mattermost-webapp/webapp/platform/types"
+  ]
+}
