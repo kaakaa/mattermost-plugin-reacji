@@ -20,12 +20,19 @@ const RhsView = () => {
     const channel = useSelector<GlobalState>((state) => getChannel(state, currentChannelId)) as Channel;
 
     const reacjiList = useReacjiList(currentChannelId);
+    if (!reacjiList || reacjiList.length === 0) {
+        return (
+            <RhsContainer>
+                <RhsTitle>{'No reacjis found in this channel.'}</RhsTitle>
+                <p>{'This view isn\'t be re-rendered automatically. If adding reacjis, reopen this view.'} </p>
+            </RhsContainer>
+        );
+    }
     const reacjis = reacjiList.map((reacji: Reacji) => {
         return (
             <RhsRow
                 key={reacji.delete_key}
-                emojiName={reacji.emoji_name}
-                channelId={reacji.to_channel_id}
+                reacji={reacji}
             />
         );
     });

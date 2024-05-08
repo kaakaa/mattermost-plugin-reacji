@@ -164,7 +164,7 @@ func (p *Plugin) remove(userID string, keys []string) (*model.CommandResponse, *
 		}
 	}
 	if err := p.Store.Reacji().Update(p.reacjiList, newList); err != nil {
-		return &model.CommandResponse{Text: "failed to remove reacjis"}, nil
+		return &model.CommandResponse{Text: fmt.Sprintf("failed to remove reacjis due to issues for storing data. details: %s", err.Error())}, nil
 	}
 	p.reacjiList = newList
 	if len(failed) == 0 {

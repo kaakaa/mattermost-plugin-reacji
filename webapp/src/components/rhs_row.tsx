@@ -8,27 +8,29 @@ import {Channel} from '@mattermost/types/channels';
 import {getChannel, getChannelsNameMapInCurrentTeam} from 'mattermost-redux/selectors/entities/channels';
 import {getCurrentTeam} from 'mattermost-redux/selectors/entities/teams';
 
-import {getSiteURL} from '@/client';
+import {Reacji} from '@/types/types';
+import {openDeleteReacjiConfirmationDialog, getSiteURL} from '@/client';
 
 // @ts-ignore
 const PostUtils = window.PostUtils;
 
 type RhsRowProps = {
-    emojiName: string;
-    channelId: string;
-}
+    reacji: Reacji;
+};
 
-const RhsRow = ({emojiName, channelId}: RhsRowProps) => {
+const RhsRow = ({reacji}: RhsRowProps) => {
+    const {emoji_name, to_channel_id, delete_key} = reacji;
+
     const siteURL = getSiteURL();
     const currentTeam = useSelector(getCurrentTeam);
     const channelNamesMap = useSelector<GlobalState>((state) => getChannelsNameMapInCurrentTeam(state)) as Record<string, Channel>;
 
     const c = PostUtils.messageHtmlToComponent(
-        PostUtils.formatText(`:${emojiName}:`),
+        PostUtils.formatText(`:${emoji_name}:`),
         true,
     );
 
-    const channel = useSelector<GlobalState>((state) => getChannel(state, channelId)) as Channel;
+    const channel = useSelector<GlobalState>((state) => getChannel(state, to_channel_id)) as Channel;
     const ch = PostUtils.messageHtmlToComponent(
         PostUtils.formatText(`~${channel.name}`, {siteURL, channelNamesMap, team: currentTeam}),
         true,
@@ -38,7 +40,11 @@ const RhsRow = ({emojiName, channelId}: RhsRowProps) => {
         <tr>
             <RhsCell>{c}</RhsCell>
             <RhsCell>{ch}</RhsCell>
-            <RhsCell><DeleteButton>{'DELETE'}</DeleteButton></RhsCell>
+            <RhsCell
+                onClick={() => openDeleteReacjiConfirmationDialog(delete_key)}
+            >
+                <DeleteButton>{'DELETE'}</DeleteButton>
+            </RhsCell>
         </tr>
     );
 };

@@ -31,13 +31,27 @@ export const fetchReacjiListByChannelId = async (channelId: string | null) => {
     return data;
 };
 
-export const doGet = async (url: string) => {
-    const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
+export const openDeleteReacjiConfirmationDialog = async (deleteKey: string) => {
+    // @ts-ignore
+    window.openInteractiveDialog({ // ref: https://github.com/mattermost/mattermost-webapp/pull/2838
+        url: `${pluginEndpoint}/api/v1/reacjis/${deleteKey}/confirm`,
+        dialog: {
+            callback_id: deleteKey,
+            title: 'Delete Reacji',
+            introduction_text: 'NOTE: If you delete a reacji from RHS, this deletion will not fire re-rendering RHS component. Please re-open RHS to see the updated list.',
+            elements: [],
+            submit_label: 'Confirm',
+            state: 'delete_confirmation',
         },
     });
+};
+
+const doGet = async (url: string, headers?: Record<string, string>) => {
+    return doRequest(url, 'GET', {'Content-Type': 'application/json'});
+};
+
+const doRequest = async (url: string, method: string, headers?: Record<string, string>) => {
+    const response = await fetch(url, {method, headers});
 
     if (!response.ok) {
         throw new Error(`Failed to fetch: ${response.statusText}`);
