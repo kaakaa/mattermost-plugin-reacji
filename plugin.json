@@ -4,7 +4,7 @@
     "description": "Move post to other channel by attaching reactions",
     "homepage_url": "https://github.com/mattermost/mattermost-plugin-reacji",
     "support_url": "https://github.com/mattermost/mattermost-plugin-reacji/issues",
-    "version": "0.5.1",
+    "version": "0.6.0",
     "min_server_version": "8.1.0",
     "server": {
         "executables": {
