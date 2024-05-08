@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.5.3](https://github.com/kaakaa/mattermost-plugin-reacji/compare/v0.5.2...v0.5.3) - 2024-05-08
+- readme by @kaakaa in https://github.com/kaakaa/mattermost-plugin-reacji/pull/31
+- appbar by @kaakaa in https://github.com/kaakaa/mattermost-plugin-reacji/pull/34
+
 ## [v0.5.2](https://github.com/kaakaa/mattermost-plugin-reacji/compare/v0.5.1...v0.5.2) - 2024-05-04
 - Tagpr by @kaakaa in https://github.com/kaakaa/mattermost-plugin-reacji/pull/29
 
