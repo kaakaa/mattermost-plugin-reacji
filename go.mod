@@ -5,6 +5,7 @@ go 1.21
 toolchain go1.21.4
 
 require (
+	github.com/gorilla/mux v1.8.1
 	github.com/mattermost/mattermost/server/public v0.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.4
@@ -21,7 +22,6 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/hashicorp/go-hclog v1.6.2 // indirect
 	github.com/hashicorp/go-plugin v1.6.0 // indirect
